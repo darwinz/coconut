@@ -541,11 +541,11 @@ f x                    n/a
 +, -                   left
 <<, >>                 left
 &                      left
-&:                     yes
+&:                     both
 ^                      left
 |                      left
-::                     yes (lazy)
-..                     yes
+::                     both (lazy)
+..                     both
 a `b` c,               left (captures lambda)
   all custom operators
 ??                     left (short-circuits)
@@ -680,7 +680,7 @@ print(list(expnums))
 
 ### Pipes
 
-Coconut uses pipe operators for pipeline-style function application. All the operators have a precedence in-between function composition pipes and comparisons, and are left-associative. All operators also support in-place versions. The different operators are:
+Coconut uses pipe operators for pipeline-style function application. All the operators have a precedence in-between function composition pipes and comparisons, and are left-associative. All operators also support in-place versions (e.g. `|>=`). The different operators are:
 ```coconut
 (|>)    => pipe forward
 (|*>)   => multiple-argument pipe forward

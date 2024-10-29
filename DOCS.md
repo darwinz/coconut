@@ -3377,8 +3377,11 @@ safe_call(might_raise_IOError).expect_error(IOError).result_or(10)
 
 To match against an `Expected`, just:
 ```
-Expected(res) = Expected("result")
-Expected(error=err) = Expected(error=TypeError())
+match some_expected:
+    case Expected(res):
+        print("result:", res)
+    case Expected(error=err):
+        print("error:", err)
 ```
 
 ##### Example
@@ -3406,7 +3409,7 @@ Additionally, if you are using [view patterns](#match), you might need to raise 
 
 In some cases where there are multiple Coconut packages installed at the same time, there may be multiple `MatchError`s defined in different packages. Coconut can perform some magic under the hood to make sure that all these `MatchError`s will seamlessly interoperate, but only if all such packages are compiled in [`--package` mode rather than `--standalone` mode](#compilation-modes).
 
-### `CoconutWarning`
+#### `CoconutWarning`
 
 `CoconutWarning` is the [`Warning`](https://docs.python.org/3/library/exceptions.html#Warning) subclass used for all runtime Coconut warnings; see [`warnings`](https://docs.python.org/3/library/warnings.html).
 
@@ -3464,13 +3467,13 @@ In Haskell, `fmap(func, obj)` takes a data type `obj` and returns a new data typ
 
 For `dict`, or any other `collections.abc.Mapping`, `fmap` will map over the mapping's `.items()` instead of the default iteration through its `.keys()`, with the new mapping reconstructed from the mapped over items. _Deprecated: `fmap$(starmap_over_mappings=True)` will `starmap` over the `.items()` instead of `map` over them._
 
-For asynchronous iterables, `fmap` will map asynchronously, making `fmap` equivalent in that case to
+For asynchronous iterables, `fmap` is equivalent to
 ```coconut_python
 async def fmap_over_async_iters(func, async_iter):
     async for item in async_iter:
         yield func(item)
 ```
-such that `fmap` can effectively be used as an async map.
+which allows mapping a synchronous function over an asynchronous iterable. To map an asynchronous function over a synchronous iterable, see [`async_map`](#async_map).
 
 Some objects from external libraries are also given special support:
 * For [`numpy`](#numpy-integration) objects, `fmap` will use [`np.vectorize`](https://docs.scipy.org/doc/numpy/reference/generated/numpy.vectorize.html) to produce the result.
@@ -3527,7 +3530,7 @@ def safe_call(f, /, *args, **kwargs):
         return Expected(error=err)
 ```
 
-To define a function that always returns an `Expected` rather than raising any errors, simply decorate it with `@safe_call$`.
+To define a function that always returns an `Expected` rather than raising any `Exception`s, simply decorate it with `@safe_call$`.
 
 ##### Example
 

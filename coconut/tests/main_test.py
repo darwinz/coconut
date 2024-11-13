@@ -181,11 +181,12 @@ ignore_last_lines_with = (
     "DeprecationWarning: The distutils package is deprecated",
     "from distutils.version import LooseVersion",
     ": CoconutWarning: Deprecated use of ",
-    "  assert_raises(",
-    "  assert ",
     "Populating initial parsing cache",
     "_coconut.warnings.warn(",
     ": SyntaxWarning: ",
+    "  assert_raises(",
+    "  assert ",
+    "  if x is 1:",
 )
 
 kernel_installation_msg = (

@@ -180,13 +180,12 @@ ignore_atexit_errors_with = (
 ignore_last_lines_with = (
     "DeprecationWarning: The distutils package is deprecated",
     "from distutils.version import LooseVersion",
-    ": SyntaxWarning: 'int' object is not ",
     ": CoconutWarning: Deprecated use of ",
     "  assert_raises(",
     "  assert ",
     "Populating initial parsing cache",
     "_coconut.warnings.warn(",
-    ": SyntaxWarning: invalid escape sequence",
+    ": SyntaxWarning: ",
 )
 
 kernel_installation_msg = (

@@ -341,7 +341,6 @@ The style issues which will cause `--strict` to throw an error are:
 - use of `"hello" "world"` implicit string concatenation (use explicit `+` instead)
 - use of `from __future__` imports (Coconut does these automatically)
 - inheriting from `object` in classes (Coconut does this automatically)
-- semicolons at end of lines
 - use of `u` to denote Unicode strings (all Coconut strings are Unicode strings)
 - `f`-strings with no format expressions in them
 - commas after [statement lambdas](#statement-lambdas) (not recommended as it can be unclear whether the comma is inside or outside the lambda)

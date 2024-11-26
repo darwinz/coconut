@@ -5399,7 +5399,8 @@ class {protocol_var}({tokens}, _coconut.typing.Protocol): pass
 
     def endline_semicolon_check(self, original, loc, tokens):
         """Check for semicolons at the end of lines."""
-        return self.check_strict("semicolon at end of line", original, loc, tokens, always_warn=True)
+        # only warn since this can have a real impact in jupyter notebooks (#859)
+        return self.check_strict("semicolon at end of line", original, loc, tokens, only_warn=True)
 
     def u_string_check(self, original, loc, tokens):
         """Check for Python-2-style unicode strings."""

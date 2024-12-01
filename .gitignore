@@ -137,6 +137,7 @@ pyston/
 pyprover/
 bbopt/
 coconut-prelude/
+coconut-issue/
 index.rst
 /coconut/icoconut/coconut/
 __coconut_cache__/

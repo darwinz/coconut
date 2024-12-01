@@ -136,11 +136,13 @@ pyston = os.path.join(os.curdir, "pyston")
 pyprover = os.path.join(os.curdir, "pyprover")
 prelude = os.path.join(os.curdir, "coconut-prelude")
 bbopt = os.path.join(os.curdir, "bbopt")
+imp_issue_dir = os.path.join(os.curdir, "coconut-issue")
 
 pyston_git = "https://github.com/evhub/pyston.git"
 pyprover_git = "https://github.com/evhub/pyprover.git"
 prelude_git = "https://github.com/evhub/coconut-prelude"
 bbopt_git = "https://github.com/evhub/bbopt.git"
+imp_issue_git = "https://github.com/evhub/coconut-issue.git"
 
 coconut_snip = "msg = '<success>'; pmsg = print$(msg); `pmsg`"
 target_3_snip = "assert super is py_super; print('<success>')"
@@ -1116,6 +1118,13 @@ if TEST_ALL:
                     comp_pyston(["--no-tco"])
                     if PYPY and PY2:
                         run_pyston()
+
+        def test_imp_issue(self):
+            with using_paths(imp_issue_dir):
+                if not os.path.exists(imp_issue_dir):
+                    call(["git", "clone", imp_issue_git])
+                with using_env_vars({"PYTHONPATH": os.pathsep.join([imp_issue_dir, os.environ.get("PYTHONPATH", "")])}):
+                    call_coconut(["-r", os.path.join(imp_issue_dir, "main.coco")])
 
 
 # -----------------------------------------------------------------------------------------------------------------------

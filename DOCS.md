@@ -504,9 +504,9 @@ Coconut integrates with [`xonsh`](https://xon.sh/) to allow the use of Coconut c
 
 For an example of using Coconut from `xonsh`:
 ```
-user@computer ~ $ xontrib load coconut
-user@computer ~ $ cd ./files
-user@computer ~ $ $(ls -la) |> .splitlines() |> len
+user@computer ~ @ xontrib load coconut
+user@computer ~ @ cd ./files
+user@computer ~ @ $(ls -la) |> .splitlines() |> len
 30
 ```
 

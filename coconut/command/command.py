@@ -24,6 +24,7 @@ import os
 import time
 import shutil
 import random
+import sysconfig
 from contextlib import contextmanager
 from subprocess import CalledProcessError
 
@@ -1078,7 +1079,7 @@ class Command(object):
     def get_jupyter_command(self):
         """Get the correct jupyter command."""
         for jupyter in (
-            [sys.executable, "-m", "jupyter"],
+            [os.path.join(sysconfig.get_path("scripts"), "jupyter")],
             [sys.executable, "-m", "ipython"],
         ):
             if PY35:  # newer Python versions should only use "jupyter", not "ipython"

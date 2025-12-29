@@ -4,3 +4,4 @@
 # Treat Coconut and Python template files as Python
 *.coco          diff=python
 *.py_template   diff=python
+*.coco linguist-language=Python

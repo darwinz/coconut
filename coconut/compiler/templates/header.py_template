@@ -966,7 +966,7 @@ class thread_map(_coconut_base_parallel_map):
     _threadlocal_ns = _coconut.threading.local()
     @staticmethod
     def _make_pool(max_workers=None):
-        return _coconut.multiprocessing_dummy.Pool(_coconut.multiprocessing.{process_}cpu_count() * 5 if max_workers is None else max_workers)
+        return _coconut.multiprocessing_dummy.Pool({cpu_count} * 5 if max_workers is None else max_workers)
 class zip(_coconut_baseclass, _coconut.zip):
     __slots__ = ("iters", "strict")
     __doc__ = getattr(_coconut.zip, "__doc__", "<see help(py_zip)>")

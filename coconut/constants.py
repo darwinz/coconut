@@ -83,6 +83,7 @@ PY39 = sys.version_info >= (3, 9)
 PY310 = sys.version_info >= (3, 10)
 PY311 = sys.version_info >= (3, 11)
 PY312 = sys.version_info >= (3, 12)
+PY314 = sys.version_info >= (3, 14)
 IPY = (
     PY36
     and (PY37 or not PYPY)
@@ -177,7 +178,11 @@ embed_on_internal_exc = get_bool_env_var("COCONUT_EMBED_ON_INTERNAL_EXC", False)
 test_computation_graph_pickling = False
 
 # should be the minimal ref count observed by maybe_copy_elem
-temp_grammar_item_ref_count = 4 if PY311 else 5
+temp_grammar_item_ref_count = (
+    1 if PY314
+    else 4 if PY311
+    else 5
+)
 
 minimum_recursion_limit = 128
 # shouldn't be raised any higher to avoid stack overflows
@@ -933,7 +938,7 @@ author_email = "evanjhub@gmail.com"
 description = "Simple, elegant, Pythonic functional programming."
 website_url = "http://coconut-lang.org"
 
-license_name = "Apache 2.0"
+license_name = "Apache-2.0"
 
 pure_python_env_var = "COCONUT_PURE_PYTHON"
 PURE_PYTHON = get_bool_env_var(pure_python_env_var, False)
@@ -1161,7 +1166,6 @@ max_versions = {
 
 classifiers = (
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: Apache Software License",
     "Intended Audience :: Developers",
     "Topic :: Software Development",
     "Topic :: Software Development :: Code Generators",

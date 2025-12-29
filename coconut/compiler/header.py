@@ -290,7 +290,7 @@ def process_header_args(which, use_hash, target, no_tco, strict, no_wrap):
         comma_slash=", /" if target_info >= (3, 8) else "",
         report_this_text=report_this_text,
         from_None=" from None" if target.startswith("3") else "",
-        process_="process_" if target_info >= (3, 13) else "",
+        cpu_count="_coconut_os.process_cpu_count()" if target_info >= (3, 13) else "_coconut.multiprocessing.cpu_count()",
         numpy_modules=tuple_str_of(numpy_modules, add_quotes=True),
         xarray_modules=tuple_str_of(xarray_modules, add_quotes=True),
         pandas_modules=tuple_str_of(pandas_modules, add_quotes=True),

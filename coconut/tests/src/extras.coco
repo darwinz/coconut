@@ -10,7 +10,7 @@ from coconut.constants import (
     NUMPY,
     PY35,
     PY36,
-    PY39,
+    PY310,
     PYPY,
 )  # type: ignore
 from coconut._pyparsing import USE_COMPUTATION_GRAPH  # type: ignore
@@ -768,7 +768,7 @@ def test_extras() -> bool:
     if NUMPY and PY36:
         assert test_pandas() is True  # .
     print(".", end="")
-    if NUMPY and PY39:
+    if NUMPY and PY310:
         assert test_xarray() is True # ..
     print(".")  # newline bc we print stuff after this
     assert test_setup_none() is True  # ...

@@ -1055,7 +1055,7 @@ class Compiler(Grammar, pickleable_obj):
                 msg + " (add '# NOQA' to suppress)",
                 original,
                 loc,
-                **kwargs,
+                **kwargs  # no comma
             )
 
     @contextmanager

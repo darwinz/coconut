@@ -6,13 +6,15 @@
       "Bash(xonsh:*)",
       "Bash(gh:*)",
       "Bash(pip:*)",
+      "Bash(conda:*)",
       "Bash(make test-tests:*)",
       "WebSearch",
       "WebFetch(domain:coconut.readthedocs.io)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:peps.python.org)",
       "WebFetch(domain:pypi.org)",
-      "WebFetch(domain:discuss.python.org)"
+      "WebFetch(domain:discuss.python.org)",
+      "WebFetch(domain:doc.pypy.org)"
     ]
   }
 }

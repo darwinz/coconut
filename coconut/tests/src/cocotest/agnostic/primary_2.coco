@@ -491,6 +491,8 @@ def primary_test_2() -> bool:
     assert reduce(function=(+), iterable=range(5), initial=-1) == 9  # type: ignore
     assert takewhile(predicate=ident, iterable=[1, 2, 1, 0, 1]) |> list == [1, 2, 1]  # type: ignore
     assert dropwhile(predicate=(not), iterable=range(5)) |> list == [1, 2, 3, 4]  # type: ignore
+    assert type(1) == int
+    assert type(b"") == bytes
     @memoize(typed=True)
     def typed_memoized_func(x):
         if x is 1:

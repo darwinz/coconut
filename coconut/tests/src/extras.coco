@@ -278,6 +278,8 @@ def f() =
 }"""'''), CoconutSyntaxError, err_has="parsing failed for format string expression")
     assert_raises(-> parse("if a = b: pass"), CoconutParseError, err_has="misplaced assignment")
     assert_raises(-> parse("while a == b"), CoconutParseError, err_has="misplaced newline")
+    # implicit coefficient followed by subscript in list should be a parse error, not internal error
+    assert_raises(-> parse("[(0)foo[0] for _ in [0]]"), CoconutParseError)
 
     try:
         parse("""

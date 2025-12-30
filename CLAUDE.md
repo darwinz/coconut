@@ -3,7 +3,6 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-
 Coconut is a functional programming language that compiles to Python. It adds features like pattern matching, algebraic data types, partial application, pipeline operators, and lazy evaluation on top of Python syntax. The compiler performs one-pass compilation using PyParsing.
 
 ## Common Commands
@@ -14,12 +13,18 @@ make dev          # Install development environment with all dependencies and pr
 ```
 
 ### Testing
+
+Tests can take a long time, especially when recompiling everything, so make sure to run them with a long timeout.
+
 ```bash
 make test          # Recompile all test files and run them (should be used whenever testing any changes to the compiler itself)
 make test-tests    # Just recompile changed test files and run them (much faster, but should only be used when the change being tested is just a change to the tests themselves)
 ```
 
-Tests can take a long time, especially when recompiling everything, so make sure to run them with a long timeout.
+### Running Coconut Code Directly
+```bash
+python -m coconut -c "your code here"    # Compile and execute Coconut code passed as a string
+```
 
 ## Architecture
 
@@ -68,6 +73,5 @@ To add tests: write Coconut code with `assert` statements in the appropriate `.c
 - **Author attribution**: Add yourself to "Authors:" in module docstrings when modifying files
 
 ## Branches
-
 - `master` - Stable releases
 - `develop` - Active development (default branch for contributions)

@@ -807,7 +807,7 @@ class Grammar(object):
         dubbackslash = Literal("\\\\")
         backslash = disambiguate_literal("\\", ["\\\\"])
         dubquestion = Literal("??")
-        questionmark = disambiguate_literal("?", ["??"])
+        questionmark = disambiguate_literal("?", ["??", "?\u21a6", "?*"])
         bang = disambiguate_literal("!", ["!="])
 
         kwds = keydefaultdict(partial(base_keyword, explicit_prefix=colon))
@@ -1311,13 +1311,18 @@ class Grammar(object):
 
         list_expr = Forward()
         list_expr_ref = testlist_star_namedexpr_tokens
+        array_literal_item = (
+            attach(comprehension_expr, add_bracks_handle)
+            | namedexpr_test + ~comma
+            | list_expr
+        )
+        # require at least one multisemicolon for array_literal to match
+        array_literal_contents = (
+            ZeroOrMore(array_literal_item)
+            + OneOrMore(multisemicolon + ZeroOrMore(array_literal_item))
+        )
         array_literal = attach(
-            lbrack.suppress() + OneOrMore(
-                multisemicolon
-                | attach(comprehension_expr, add_bracks_handle)
-                | namedexpr_test + ~comma
-                | list_expr
-            ) + rbrack.suppress(),
+            lbrack.suppress() + array_literal_contents + rbrack.suppress(),
             array_literal_handle,
         )
         list_item = (

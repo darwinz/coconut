@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(make test-tests:*)",
+      "Bash(python -m coconut:*)",
+      "Bash(make test:*)"
+    ]
+  }
+}

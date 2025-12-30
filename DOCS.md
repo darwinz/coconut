@@ -680,7 +680,7 @@ print(list(expnums))
 
 ### Pipes
 
-Coconut uses pipe operators for pipeline-style function application. All the operators have a precedence in-between function composition pipes and comparisons, and are left-associative. All operators also support in-place versions (e.g. `|>=`). The different operators are:
+Coconut uses pipe operators for pipeline-style function application. All the operators have a precedence directly below [function composition pipes](#function-composition) and above comparisons (see the [precedence table](#precedence)), and are left-associative. All operators also support in-place versions (e.g. `|>=`). The different operators are:
 ```coconut
 (|>)    => pipe forward
 (|*>)   => multiple-argument pipe forward
@@ -753,7 +753,7 @@ async def do_stuff(some_data):
 
 ### Function Composition
 
-Coconut has three basic function composition operators: `..`, `..>`, and `<..`. Both `..` and `<..` use math-style "backwards" function composition, where the first function is called last, while `..>` uses "forwards" function composition, where the first function is called first. Forwards and backwards function composition pipes cannot be used together in the same expression (unlike normal pipes) and have precedence in-between `None`-coalescing and normal pipes.
+Coconut has three basic function composition operators: `..`, `..>`, and `<..`. Both `..` and `<..` use math-style "backwards" function composition, where the first function is called last, while `..>` uses "forwards" function composition, where the first function is called first. Forwards and backwards function composition pipes cannot be used together in the same expression (unlike normal pipes) and have a precedence directly below [the `None`-coalescing operator `??`](#none-coalescing) and above normal [pipes](#pipes) (see the [precedence table](#precedence)).
 
 The `..>` and `<..` function composition pipe operators also have multi-arg, keyword, and None variants as with [normal pipes](#pipes). The full list of function composition pipe operators is:
 ```
@@ -968,7 +968,7 @@ Coconut provides `??` as a `None`-coalescing operator, similar to the `??` null-
 
 Coconut's `??` operator evaluates to its left operand if that operand is not `None`, otherwise its right operand. The expression `foo ?? bar` evaluates to `foo` as long as it isn't `None`, and to `bar` if it is. The `None`-coalescing operator is short-circuiting, such that if the left operand is not `None`, the right operand won't be evaluated. This allows the right operand to be a potentially expensive operation without incurring any unnecessary cost.
 
-The `None`-coalescing operator has a precedence in-between infix function calls and composition pipes, and is left-associative.
+The `None`-coalescing operator has a precedence directly below [infix function calls](#infix-functions) and above [composition pipes](#function-composition) (see the [precedence table](#precedence)), and is left-associative.
 
 ##### Example
 

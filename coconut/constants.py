@@ -26,6 +26,7 @@ import platform
 import re
 import datetime as dt
 from warnings import warn
+from collections import defaultdict
 
 # -----------------------------------------------------------------------------------------------------------------------
 # UTILITIES:
@@ -179,8 +180,8 @@ embed_on_internal_exc = get_bool_env_var("COCONUT_EMBED_ON_INTERNAL_EXC", False)
 test_computation_graph_pickling = False
 
 # should be the minimal ref count observed by maybe_copy_elem
-temp_grammar_item_ref_count = (
-    1 if PY314
+min_observed_ref_count = (
+    defaultdict(lambda: 2, attach=1) if PY314
     else 4 if PY311
     else 5
 )

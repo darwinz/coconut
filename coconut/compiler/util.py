@@ -106,7 +106,7 @@ from coconut.constants import (
     pseudo_targets,
     reserved_vars,
     packrat_cache_size,
-    temp_grammar_item_ref_count,
+    min_observed_ref_count,
     indchars,
     comment_chars,
     non_syntactic_newline,
@@ -987,6 +987,10 @@ assert _value_useful == -1, "value must end with usefullness obj"
 def maybe_copy_elem(item, name):
     """Copy the given grammar element if it's referenced somewhere else."""
     item_ref_count = sys.getrefcount(item) if CPYTHON and not on_new_python else float("inf")
+    if isinstance(min_observed_ref_count, dict):
+        temp_grammar_item_ref_count = min_observed_ref_count[name]
+    else:
+        temp_grammar_item_ref_count = min_observed_ref_count
     internal_assert(lambda: item_ref_count >= temp_grammar_item_ref_count, "add_action got item with too low ref count", (item, type(item), item_ref_count))
     if item_ref_count <= temp_grammar_item_ref_count:
         if DEVELOP:

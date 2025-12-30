@@ -96,7 +96,7 @@ class TestConstants(unittest.TestCase):
                 assert_hashable_or_dict(name, value)
 
     def test_imports(self):
-        for new_imp, (old_imp, ver_cutoff) in constants.py3_to_py2_stdlib.items():
+        for new_imp, (old_imp, ver_cutoff) in constants.new_to_old_stdlib.items():
             if "/" in old_imp:
                 new_imp, old_imp = new_imp.split(".", 1)[0], old_imp.split("./", 1)[0]
             if (

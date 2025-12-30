@@ -2,12 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(cat:*)",
-      "Bash(make test-tests:*)",
-      "Bash(make test:*)",
+      "Bash(make:*)",
       "Bash(python:*)",
       "Bash(xonsh:*)",
+      "Bash(gh:*)",
+      "WebSearch",
       "WebFetch(domain:coconut.readthedocs.io)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:peps.python.org)"
     ]
   }
 }

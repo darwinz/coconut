@@ -73,7 +73,7 @@ from coconut.constants import (
     tabideal,
     match_to_args_var,
     match_to_kwargs_var,
-    py3_to_py2_stdlib,
+    new_to_old_stdlib,
     reserved_prefix,
     function_match_error_var,
     legal_indent_chars,
@@ -3987,8 +3987,8 @@ def __hash__(self):
             for i in reversed(range(1, len(path) + 1)):
                 base, exts = ".".join(path[:i]), path[i:]
                 clean_base = base.replace("/", "")
-                if clean_base in py3_to_py2_stdlib:
-                    old_imp, version_check = py3_to_py2_stdlib[clean_base]
+                if clean_base in new_to_old_stdlib:
+                    old_imp, version_check = new_to_old_stdlib[clean_base]
                     if old_imp.endswith("#"):
                         type_ignore = True
                         old_imp = old_imp[:-1]

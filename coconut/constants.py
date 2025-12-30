@@ -469,7 +469,7 @@ untcoable_funcs = (
     r"typing\.[a-zA-Z0-9_.]+",
 )
 
-py3_to_py2_stdlib = {
+new_to_old_stdlib = {
     # new_name: (old_name, before_version_info)
     "builtins": ("__builtin__", (3,)),
     "configparser": ("ConfigParser", (3,)),
@@ -576,6 +576,7 @@ py3_to_py2_stdlib = {
     "typing.Self": ("typing_extensions./Self", (3, 11)),
     "typing.TypeVarTuple": ("typing_extensions./TypeVarTuple", (3, 11)),
     "typing.Unpack": ("typing_extensions./Unpack", (3, 11)),
+    "typing.TypeForm": ("typing_extensions./TypeForm", (3, 14)),
 }
 
 import_existing = {
@@ -960,7 +961,8 @@ all_reqs = {
         ("typing_extensions", "py<36"),
         ("typing_extensions", "py==36"),
         ("typing_extensions", "py==37"),
-        ("typing_extensions", "py>=38"),
+        ("typing_extensions", "py==38"),
+        ("typing_extensions", "py>=39"),
         ("trollius", "py<3;cpy"),
         ("aenum", "py<34"),
         ("dataclasses", "py==36"),
@@ -981,8 +983,8 @@ all_reqs = {
         ("ipython", "py3;py<37"),
         ("ipython", "py==37"),
         ("ipython", "py==38"),
-        ("ipython", "py==39"),
-        ("ipython", "py>=310"),
+        ("ipython", "py>=39;py<311"),
+        ("ipython", "py>=311"),
         ("ipykernel", "py<3"),
         ("ipykernel", "py3;py<38"),
         ("ipykernel", "py>=38;py<310"),
@@ -1022,8 +1024,8 @@ all_reqs = {
     ),
     "xonsh": (
         ("xonsh", "py<36"),
-        ("xonsh", "py>=36;py<39"),
-        ("xonsh", "py39"),
+        ("xonsh", "py>=36;py<311"),
+        ("xonsh", "py311"),
     ),
     "dev": (
         ("pre-commit", "py3"),
@@ -1079,15 +1081,16 @@ unpinned_min_versions = {
     "pyright": (1, 1),
     ("jupyter-console", "py>=37"): (6, 6),
     ("typing", "py<35"): (3, 10),
-    ("typing_extensions", "py>=38"): (4, 14),
     ("ipykernel", "py>=310"): (7,),
     ("jedi", "py>=39"): (0, 19),
     ("pygments", "py>=39"): (2, 19),
-    ("xonsh", "py39"): (0, 22),
+    ("xonsh", "py311"): (0, 22),
     ("async_generator", "py35"): (1, 10),
     ("exceptiongroup", "py37;py<311"): (1,),
-    ("ipython", "py>=310"): (9,),
+    ("ipython", "py>=311"): (9,),
     "py-spy": (0, 4),
+    # whenever this is upgraded, it means we also need to add the new stuff to new_to_old_stdlib
+    ("typing_extensions", "py>=39"): (4, 15),
     # if this breaks, instead of making it version-specific, just change the MYPY flag above
     "mypy[python2]": (1, 19),
 }
@@ -1101,16 +1104,17 @@ pinned_min_versions = {
     ("pytest", "py>=38"): (8, 0),
     # don't upgrade these; they break on Python 3.9
     ("numpy", "py34;py<39"): (1, 18),
-    ("ipython", "py==39"): (8, 18),
+    ("ipython", "py>=39;py<311"): (8, 18),
     # don't upgrade these; they break on Python 3.8
     ("ipykernel", "py>=38;py<310"): (6,),
     ("ipython", "py==38"): (8, 12),
+    ("typing_extensions", "py==38"): (4, 12),
     # don't upgrade these; they break on Python 3.7
     ("ipython", "py==37"): (7, 34),
     ("typing_extensions", "py==37"): (4, 7),
     # don't upgrade these; they break on Python 3.6
     ("anyio", "py36"): (3,),
-    ("xonsh", "py>=36;py<39"): (0, 11),
+    ("xonsh", "py>=36;py<311"): (0, 11),
     ("pandas", "py36"): (1, 1),
     ("jupyter-client", "py>=36"): (7, 1, 2),
     ("typing_extensions", "py==36"): (4, 1),

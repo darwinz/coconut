@@ -29,6 +29,7 @@ from coconut.constants import (
     PYPY,
     PY26,
     PY39,
+    PY313,
     fixpath,
 )
 
@@ -111,6 +112,8 @@ class TestConstants(unittest.TestCase):
                 or old_imp.startswith(("typing_extensions", "async_generator"))
                 # don't test _dummy_thread on Py3.9
                 or PY39 and new_imp == "_dummy_thread"
+                # don't test tix on Python 3.13+
+                or PY313 and new_imp == "tkinter.tix"
             ):
                 pass
             elif sys.version_info >= ver_cutoff:

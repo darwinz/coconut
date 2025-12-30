@@ -83,6 +83,7 @@ PY39 = sys.version_info >= (3, 9)
 PY310 = sys.version_info >= (3, 10)
 PY311 = sys.version_info >= (3, 11)
 PY312 = sys.version_info >= (3, 12)
+PY313 = sys.version_info >= (3, 13)
 PY314 = sys.version_info >= (3, 14)
 IPY = (
     PY36
@@ -91,7 +92,7 @@ IPY = (
     and sys.version_info[:2] != (3, 7)
 )
 MYPY = (
-    PY38
+    PY39
     and not WINDOWS
     and not PYPY
     # TODO: disabled until MyPy supports PEP 695
@@ -948,7 +949,8 @@ PURE_PYTHON = get_bool_env_var(pure_python_env_var, False)
 all_reqs = {
     "main": (
         ("argparse", "py<27"),
-        ("psutil", "py>=27"),
+        ("psutil", "py>=27;py<3"),
+        ("psutil", "py3"),
         ("futures", "py<3"),
         ("backports.functools-lru-cache", "py<3"),
         ("prompt_toolkit", "py<3"),
@@ -1044,7 +1046,7 @@ all_reqs = {
         ("numpy", "py34;py<39"),
         ("numpy", "py>=39"),
         ("pandas", "py36"),
-        ("xarray", "py39"),
+        ("xarray", "py310"),
     ),
     "tests": (
         ("pytest", "py<36"),
@@ -1059,7 +1061,7 @@ all_reqs = {
 unpinned_min_versions = {
     "cPyparsing": (2, 4, 7, 2, 4, 1),
     ("pre-commit", "py3"): (4,),
-    ("psutil", "py>=27"): (7,),
+    ("psutil", "py3"): (7,),
     "jupyter": (1, 1),
     "types-backports": (0, 1),
     ("futures", "py<3"): (3, 4),
@@ -1067,14 +1069,13 @@ unpinned_min_versions = {
     "pexpect": (4,),
     ("trollius", "py<3;cpy"): (2, 2),
     "requests": (2, 32),
-    ("xarray", "py39"): (2025,),
+    ("xarray", "py310"): (2025,),
     ("dataclasses", "py==36"): (0, 8),
     ("aenum", "py<34"): (3, 1, 16),
     "pydata-sphinx-theme": (0, 16),
     "myst-parser": (4,),
     "sphinxcontrib_applehelp": (2,),
     "sphinxcontrib_htmlhelp": (2,),
-    "mypy[python2]": (1, 19),
     "pyright": (1, 1),
     ("jupyter-console", "py>=37"): (6, 6),
     ("typing", "py<35"): (3, 10),
@@ -1087,6 +1088,8 @@ unpinned_min_versions = {
     ("exceptiongroup", "py37;py<311"): (1,),
     ("ipython", "py>=310"): (9,),
     "py-spy": (0, 4),
+    # if this breaks, instead of making it version-specific, just change the MYPY flag above
+    "mypy[python2]": (1, 19),
 }
 
 pinned_min_versions = {
@@ -1136,6 +1139,7 @@ pinned_min_versions = {
     ("jupyter-console", "py<35"): (5, 2),
     ("ipython", "py<3"): (5, 4),
     ("ipykernel", "py<3"): (4, 10),
+    ("psutil", "py>=27;py<3"): (6,),
     ("prompt_toolkit", "py<3"): (1,),
     "watchdog": (0, 10),
     "papermill": (1, 2),

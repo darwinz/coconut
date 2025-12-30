@@ -659,6 +659,19 @@ def comp_311(args=[], always_sys=False, **kwargs):
     comp(path="cocotest", folder="target_311", args=["--target", "311" if not always_sys else "sys"] + args, **kwargs)
 
 
+def comp_314(args=[], always_sys=False, **kwargs):
+    """Compiles target_314."""
+    # remove --mypy checking when running on Python 3.14 since MyPy can't parse t-strings
+    if sys.version_info < (3, 14):
+        try:
+            mypy_ind = args.index("--mypy")
+        except ValueError:
+            pass
+        else:
+            args = args[:mypy_ind]
+    comp(path="cocotest", folder="target_314", args=["--target", "314" if not always_sys else "sys"] + args, **kwargs)
+
+
 def comp_sys(args=[], **kwargs):
     """Compiles target_sys."""
     comp(path="cocotest", folder="target_sys", args=["--target", "sys"] + args, **kwargs)
@@ -719,6 +732,8 @@ def run(
                         comp_38(args, **spec_kwargs)
                     if sys.version_info >= (3, 11):
                         comp_311(args, **spec_kwargs)
+                    if sys.version_info >= (3, 14):
+                        comp_314(args, **spec_kwargs)
 
                 if not run_directory:
                     comp_agnostic(agnostic_args, **kwargs)
@@ -776,6 +791,7 @@ def comp_all(args=[], agnostic_target=None, **kwargs):
     comp_36(args, **kwargs)
     comp_38(args, **kwargs)
     comp_311(args, **kwargs)
+    comp_314(args, **kwargs)
     comp_sys(args, **kwargs)
     # do non-strict at the end so we get the non-strict header
     comp_non_strict(args, **kwargs)

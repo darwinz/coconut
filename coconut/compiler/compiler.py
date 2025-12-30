@@ -858,6 +858,7 @@ class Compiler(Grammar, pickleable_obj):
         cls.testlist_star_namedexpr <<= attach(cls.testlist_star_namedexpr_tokens, cls.method("testlist_star_expr_handle"))
         cls.ellipsis <<= attach(cls.ellipsis_tokens, cls.method("ellipsis_handle"))
         cls.f_string <<= attach(cls.f_string_tokens, cls.method("f_string_handle"))
+        cls.t_string <<= attach(cls.t_string_tokens, cls.method("t_string_handle"))
         cls.funcname_typeparams <<= attach(cls.funcname_typeparams_tokens, cls.method("funcname_typeparams_handle"))
 
         # standard handlers of the form name <<= attach(name_ref, method("name_handle"))
@@ -4644,8 +4645,8 @@ __annotations__["{name}"] = {annotation}
             out += "if not " + check_var + default
         return out
 
-    def f_string_handle(self, original, loc, tokens):
-        """Process Python 3.6 format strings."""
+    def f_string_handle(self, original, loc, tokens, is_t=False):
+        """Process Python 3.6 format strings and Python 3.14 template strings."""
         string, = tokens
 
         # strip raw r
@@ -4662,7 +4663,7 @@ __annotations__["{name}"] = {annotation}
 
         # warn if there are no exprs
         if not exprs:
-            self.strict_err_or_warn("f-string with no expressions", original, loc)
+            self.strict_err_or_warn(("t" if is_t else "f") + "-string with no expressions", original, loc)
 
         # handle Python 3.8 f string = specifier
         for i, expr in enumerate(exprs):
@@ -4683,22 +4684,39 @@ __annotations__["{name}"] = {annotation}
                 raise CoconutDeferredSyntaxError("illegal complex expression in format string: " + co_expr, loc)
             compiled_exprs.append(py_expr)
 
-        # reconstitute string
-        #  (though f strings are supported on 3.6+, nested strings with the same strchars are only
-        #   supported on 3.12+, so we should only use the literal syntax there)
-        if self.target_info >= (3, 12):
+        # handle t-strings
+        if is_t:
             new_text = interleaved_join(string_parts, compiled_exprs)
-            return "f" + ("r" if raw else "") + self.wrap_str(new_text, strchar)
+            if self.target_info >= (3, 14):
+                # Native t-string syntax
+                return "t" + ("r" if raw else "") + self.wrap_str(new_text, strchar)
+            else:
+                # Use tstr backport - tstr.t() uses caller's frame for variable lookup
+                # Will raise runtime error if tstr not available (works with universal target)
+                template_str = ("r" if raw else "") + self.wrap_str(new_text, strchar)
+                return "_coconut.tstr.t(" + template_str + ")" + self.type_ignore_comment()
 
         else:
-            names = [format_var + "_" + str(i) for i in range(len(compiled_exprs))]
-            new_text = interleaved_join(string_parts, names)
+            # reconstitute string
+            #  (though f strings are supported on 3.6+, nested strings with the same strchars are only
+            #   supported on 3.12+, so we should only use the literal syntax there)
+            if self.target_info >= (3, 12):
+                new_text = interleaved_join(string_parts, compiled_exprs)
+                return "f" + ("r" if raw else "") + self.wrap_str(new_text, strchar)
 
-            # generate format call
-            return ("r" if raw else "") + self.wrap_str(new_text, strchar) + ".format(" + ", ".join(
-                name + "=(" + self.wrap_passthrough(expr) + ")"
-                for name, expr in zip(names, compiled_exprs)
-            ) + ")"
+            else:
+                names = [format_var + "_" + str(i) for i in range(len(compiled_exprs))]
+                new_text = interleaved_join(string_parts, names)
+
+                # generate format call
+                return ("r" if raw else "") + self.wrap_str(new_text, strchar) + ".format(" + ", ".join(
+                    name + "=(" + self.wrap_passthrough(expr) + ")"
+                    for name, expr in zip(names, compiled_exprs)
+                ) + ")"
+
+    def t_string_handle(self, original, loc, tokens):
+        """Process Python 3.14 template strings."""
+        return self.f_string_handle(original, loc, tokens, is_t=True)
 
     def decorators_handle(self, loc, tokens):
         """Process decorators."""

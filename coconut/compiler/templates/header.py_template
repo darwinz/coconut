@@ -27,6 +27,7 @@ class _coconut{object}:{COMMENT.EVERYTHING_HERE_MUST_BE_COPIED_TO_STUB_FILE}
         import async_generator
     except ImportError as async_generator_import_err:
         async_generator = _coconut_missing_module(async_generator_import_err)
+{import_tstr}
 {import_pickle}
 {import_OrderedDict}
 {import_collections_abc}

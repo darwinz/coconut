@@ -59,6 +59,13 @@ else:
 
 if sys.version_info >= (3, 5):
     import async_generator as _async_generator  # type: ignore
+else:
+    _async_generator = ...  # type: ignore
+
+if sys.version_info >= (3, 14):
+    import tstr as _tstr  # type: ignore
+else:
+    _tstr = ...  # type: ignore
 
 try:
     import numpy as _numpy  # type: ignore
@@ -95,6 +102,7 @@ copyreg = _copyreg
 asyncio = _asyncio
 asyncio_Return = StopIteration
 async_generator = _async_generator
+tstr = _tstr
 pickle = _pickle
 if sys.version_info >= (2, 7):
     OrderedDict = collections.OrderedDict

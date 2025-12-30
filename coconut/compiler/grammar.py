@@ -929,11 +929,13 @@ class Grammar(object):
 
         u_string = Forward()
         f_string = Forward()
+        t_string = Forward()
 
         bit_b = caseless_literal("b")
         raw_r = caseless_literal("r")
         unicode_u = caseless_literal("u", suppress=True)
         format_f = caseless_literal("f", suppress=True)
+        template_t = caseless_literal("t", suppress=True)
 
         string = combine(Optional(raw_r) + string_item)
         # Python 2 only supports br"..." not rb"..."
@@ -941,8 +943,9 @@ class Grammar(object):
         # ur"..."/ru"..." strings are not suppored in Python 3
         u_string_ref = combine(unicode_u + string_item)
         f_string_tokens = combine((format_f + Optional(raw_r) | raw_r + format_f) + string_item)
+        t_string_tokens = combine((template_t + Optional(raw_r) | raw_r + template_t) + string_item)
         nonbf_string = string | u_string
-        nonb_string = nonbf_string | f_string
+        nonb_string = nonbf_string | f_string | t_string
         any_string = nonb_string | b_string
         moduledoc = any_string + newline
         docstring = condense(moduledoc)
@@ -2862,7 +2865,7 @@ class Grammar(object):
             | fixto(end_of_line, "misplaced newline (maybe missing ':')")
         )
 
-        start_f_str_regex = compile_regex(r"\br?fr?$")
+        start_f_str_regex = compile_regex(r"\br?[ft]r?$")
         start_f_str_regex_len = 4
 
         end_f_str_expr = StartOfStrGrammar(combine(rbrace | colon | bang).leaveWhitespace())

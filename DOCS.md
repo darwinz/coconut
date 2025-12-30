@@ -364,6 +364,7 @@ In addition to the newer Python features that Coconut can backport automatically
 - [`aenum`](https://pypi.org/project/aenum) for backporting [`enum`](https://docs.python.org/3/library/enum.html).
 - [`async_generator`](https://github.com/python-trio/async_generator) for backporting [`async` generators](https://peps.python.org/pep-0525/) and [`asynccontextmanager`](https://docs.python.org/3/library/contextlib.html#contextlib.asynccontextmanager).
 - [`trollius`](https://pypi.python.org/pypi/trollius) for backporting [`async`/`await`](https://docs.python.org/3/library/asyncio-task.html) and [`asyncio`](https://docs.python.org/3/library/asyncio.html).
+- [`tstr`](https://github.com/ilotoki0804/tstr) for backporting [template strings (`t"..."`)](https://peps.python.org/pep-0750/) on Python < 3.14.
 
 Note that, when distributing compiled Coconut code, if you use any of these backports, you'll need to make sure that the requisite backport module is included as a dependency.
 

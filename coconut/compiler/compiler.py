@@ -1046,6 +1046,18 @@ class Compiler(Grammar, pickleable_obj):
         else:
             self.syntax_warning(*args, **kwargs)
 
+    def strict_qa_error(self, msg, original, loc, **kwargs):
+        """Strict error or warn an error that should be disabled by a NOQA comment."""
+        ln = self.adjust(lineno(loc, original))
+        comment = self.reformat(" ".join(self.comments[ln]), ignore_errors=True)
+        if not self.noqa_regex.search(comment):
+            self.strict_err_or_warn(
+                msg + " (add '# NOQA' to suppress)",
+                original,
+                loc,
+                **kwargs,
+            )
+
     @contextmanager
     def complain_on_err(self):
         """Complain about any parsing-related errors raised inside."""
@@ -1405,30 +1417,19 @@ class Compiler(Grammar, pickleable_obj):
             elif inputstring is not None and not inner:
                 logger.log("No streamlining done for input of length {length}.".format(length=input_len))
 
-    def qa_error(self, msg, original, loc):
-        """Strict error or warn an error that should be disabled by a NOQA comment."""
-        ln = self.adjust(lineno(loc, original))
-        comment = self.reformat(" ".join(self.comments[ln]), ignore_errors=True)
-        if not self.noqa_regex.search(comment):
-            self.strict_err_or_warn(
-                msg + " (add '# NOQA' to suppress)",
-                original,
-                loc,
-                endpoint=False,
-            )
-
     def run_final_checks(self, original, keep_state=False):
         """Run post-parsing checks to raise any necessary errors/warnings."""
         # only check for unused imports/etc. if we're not keeping state accross parses
         if not keep_state:
             for name, info in self.name_info.items():
+                # always use endpoint=False otherwise the endpoint will be the end of the file since we've finished parsing
                 if info["imported"] and not info["referenced"]:
                     for loc in info["imported"]:
-                        self.qa_error("found unused import " + repr(self.reformat(name, ignore_errors=True)), original, loc)
+                        self.strict_qa_error("found unused import " + repr(self.reformat(name, ignore_errors=True)), original, loc, endpoint=False)
                 if not self.star_import:  # only check for undefined names when there are no * imports
                     if name not in all_builtins and info["referenced"] and not (info["assigned"] or info["imported"]):
                         for loc in info["referenced"]:
-                            self.qa_error("found undefined name " + repr(self.reformat(name, ignore_errors=True)), original, loc)
+                            self.strict_qa_error("found undefined name " + repr(self.reformat(name, ignore_errors=True)), original, loc, endpoint=False)
 
     def pickle_cache(self, original, cache_path, include_incremental=True):
         """Pickle the pyparsing cache for original to cache_path."""
@@ -3135,7 +3136,7 @@ else:
                 elif arg[1] == "=":
                     kwd_args.append(arg[0] + "=" + arg[0])
                 elif arg[0] == "...":
-                    self.strict_err_or_warn("'...={name}' shorthand is deprecated, use '{name}=' shorthand instead".format(name=arg[1]), original, loc)
+                    self.strict_qa_error("'...={name}' shorthand is deprecated, use '{name}=' shorthand instead".format(name=arg[1]), original, loc)
                     kwd_args.append(arg[1] + "=" + arg[1])
                 else:
                     kwd_args.append(argstr)
@@ -3356,7 +3357,7 @@ else:
                 elif trailer[0] == "[]":
                     out = "_coconut_partial(_coconut.operator.getitem, " + out + ")"
                 elif trailer[0] == ".":
-                    self.strict_err_or_warn("'obj.' as a shorthand for 'getattr$(obj)' is deprecated (just use the getattr partial)", original, loc)
+                    self.strict_qa_error("'obj.' as a shorthand for 'getattr$(obj)' is deprecated (just use the getattr partial)", original, loc)
                     out = "_coconut_partial(_coconut.getattr, " + out + ")"
                 elif trailer[0] == "type:[]":
                     out = "_coconut.typing.Sequence[" + out + "]"
@@ -3575,7 +3576,7 @@ while True:
                 and not kwd_args
                 and not dubstar_args
             ):
-                self.strict_err_or_warn("unnecessary inheriting from object (Coconut does this automatically)", original, loc)
+                self.strict_qa_error("unnecessary inheriting from object (Coconut does this automatically)", original, loc)
 
             # universalize if not Python 3
             if not self.target.startswith("3"):
@@ -3920,7 +3921,7 @@ def __hash__(self):
             if item == "=":
                 item = name
             elif name == "...":
-                self.strict_err_or_warn("'...={item}' shorthand is deprecated, use '{item}=' shorthand instead".format(item=item), original, loc)
+                self.strict_qa_error("'...={item}' shorthand is deprecated, use '{item}=' shorthand instead".format(item=item), original, loc)
                 name = item
             names.append(name)
             items.append(item)
@@ -4053,7 +4054,7 @@ if {store_var} is not _coconut_sentinel:
         elif len(tokens) == 2:
             imp_from, imports = tokens
             if imp_from == "__future__":
-                self.strict_err_or_warn("unnecessary from __future__ import (Coconut does these automatically)", original, loc)
+                self.strict_qa_error("unnecessary from __future__ import (Coconut does these automatically)", original, loc)
                 return ""
         else:
             raise CoconutInternalException("invalid import tokens", tokens)
@@ -4356,7 +4357,7 @@ def {name}({match_func_paramdef}):
                 got_kwds, params, typedef, stmts_toks, followed_by = tokens
 
             if followed_by == ",":
-                self.strict_err_or_warn("found statement lambda followed by comma; this isn't recommended as it can be unclear whether the comma is inside or outside the lambda (just wrap the lambda in parentheses)", original, loc)
+                self.strict_qa_error("found statement lambda followed by comma; this isn't recommended as it can be unclear whether the comma is inside or outside the lambda (just wrap the lambda in parentheses)", original, loc)
             else:
                 internal_assert(followed_by == "", "invalid stmt_lambdef followed_by", followed_by)
 
@@ -4615,7 +4616,7 @@ __annotations__["{name}"] = {annotation}
             raise CoconutInternalException("invalid case tokens", tokens)
 
         if block_kwd == "case":
-            self.strict_err_or_warn(
+            self.strict_qa_error(
                 "deprecated case keyword at top level in case ...: match ...: block (use Python 3.10 match ...: case ...: syntax instead)",
                 original,
                 loc,
@@ -4663,7 +4664,7 @@ __annotations__["{name}"] = {annotation}
 
         # warn if there are no exprs
         if not exprs:
-            self.strict_err_or_warn(("t" if is_t else "f") + "-string with no expressions", original, loc)
+            self.strict_qa_error(("t" if is_t else "f") + "-string with no expressions", original, loc)
 
         # handle Python 3.8 f string = specifier
         for i, expr in enumerate(exprs):
@@ -4923,7 +4924,7 @@ async with {iter_item} as {temp_var}:
             return tokens[0]
         else:
             if not allow_silent_concat:
-                self.strict_err_or_warn("found implicit string concatenation (use explicit '+' instead)", original, loc)
+                self.strict_qa_error("found implicit string concatenation (use explicit '+' instead)", original, loc)
             if any(s.endswith(")") for s in tokens):  # has .format() calls
                 # parens are necessary for string_atom_handle
                 return "(" + " + ".join(tokens) + ")"
@@ -5077,7 +5078,7 @@ class {protocol_var}({tokens}, _coconut.typing.Protocol): pass
         if bound_op is not None:
             self.internal_assert(bound_op_type in ("bound", "constraint"), original, loc, "invalid type_param bound_op", bound_op)
             if bound_op == "<=":
-                self.strict_err_or_warn(
+                self.strict_qa_error(
                     "use of " + repr(bound_op) + " as a type parameter " + bound_op_type + " declaration operator is deprecated (Coconut style is to use '<:' for bounds and ':' for constaints)",
                     original,
                     loc,
@@ -5352,7 +5353,7 @@ class {protocol_var}({tokens}, _coconut.typing.Protocol): pass
             and not (classname or expr_setname)
             and name in all_builtins
         ):
-            self.strict_err_or_warn(
+            self.strict_qa_error(
                 "assignment shadows builtin '{name}' (use explicit '\\{name}' syntax when purposefully assigning to builtin names)".format(name=name),
                 original,
                 loc,

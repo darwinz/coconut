@@ -75,3 +75,17 @@ To add tests: write Coconut code with `assert` statements in the appropriate `.c
 ## Branches
 - `master` - Stable releases
 - `develop` - Active development (default branch for contributions)
+
+## Debugging GitHub Actions
+
+### Viewing Logs for a Specific Job
+
+When investigating a failed GitHub Actions job, use the GitHub API directly:
+
+```bash
+gh api repos/evhub/coconut/actions/jobs/{job_id}/logs
+```
+
+Replace `{job_id}` with the job ID from the URL (e.g., for `.../job/59132870840`, use `59132870840`).
+
+**Note:** The more common `gh run view {run_id} --log-failed` command doesn't work if the overall run is still in progress, even if the specific job you want has already completed. Using the API directly bypasses this limitation.

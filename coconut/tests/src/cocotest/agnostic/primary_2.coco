@@ -499,12 +499,12 @@ def primary_test_2() -> bool:
             return (x, typed_memoized_func(1))
     assert typed_memoized_func(1.0) == (1.0, None)
     assert typed_memoized_func(1.0)[0] |> type == float
-    @memoize()
-    def untyped_memoized_func(x=None):
+    @memoize(memoize.RECURSIVE, typed=True)  # type: ignore
+    def recursive_typed_memoized_func(x=None):
         if x is None:
-            return (untyped_memoized_func(1), untyped_memoized_func(1.0))
+            return (recursive_typed_memoized_func(1), recursive_typed_memoized_func(1.0))
         return x
-    assert untyped_memoized_func() |> map$(type) |> tuple == (int, float)
+    assert recursive_typed_memoized_func() |> map$(type) |> tuple == (int, float)
     assert -1 ?↦ abs == 1
     assert None ?↦ abs is None
 

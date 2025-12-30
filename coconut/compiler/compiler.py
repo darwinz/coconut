@@ -5440,7 +5440,6 @@ class {protocol_var}({tokens}, _coconut.typing.Protocol): pass
             loc,
             tokens,
             only_warn=True,
-            always_warn=True,
         )
 
     def check_py(self, version, name, original, loc, tokens):

@@ -579,11 +579,11 @@ if {assign_to} is _coconut_sentinel:
         self.add_check("_coconut.isinstance(" + item + ", _coconut.abc.Mapping)")
 
         if rest is None:
-            self.rule_conflict_warn(
-                "found pattern with new behavior in Coconut v2; dict patterns now allow the dictionary being matched against to contain extra keys",
-                extra="use explicit '{..., **_}' or '{..., **{}}' syntax to resolve",
-                only_strict=True,
-            )
+            # self.rule_conflict_warn(
+            #     "found pattern with new behavior in Coconut v2; dict patterns now allow the dictionary being matched against to contain extra keys",
+            #     extra="use explicit '{..., **_}' or '{..., **{}}' syntax to resolve",
+            #     only_strict=True,
+            # )
             strict_len = not self.using_python_rules
         elif rest == "{}":
             strict_len = True
@@ -1030,6 +1030,7 @@ if {assign_to} is _coconut_sentinel:
             self.rule_conflict_warn(
                 "found pattern with new behavior in Coconut v3; set patterns now allow the set being matched against to contain extra items",
                 extra="use explicit '{..., *_}' or '{..., *()}' syntax to resolve",
+                only_strict=True,
             )
             strict_len = not self.using_python_rules
         elif star == wildcard:

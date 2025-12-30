@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-Coconut is a functional programming language that compiles to Python. It adds features like pattern matching, algebraic data types, partial application, pipeline operators, and lazy evaluation on top of Python syntax. The compiler performs one-pass compilation using PyParsing.
+Coconut is a functional programming language that compiles to Python. It adds features like pattern matching, algebraic data types, partial application, pipeline operators, and lazy evaluation on top of Python syntax. The compiler performs one-pass compilation using PyParsing. If you are ever uncertain about what the intended behavior should be, refer to the documentation in DOCS.md.
 
 ## Common Commands
 

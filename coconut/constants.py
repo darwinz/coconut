@@ -983,19 +983,20 @@ all_reqs = {
         ("ipython", "py>=310"),
         ("ipykernel", "py<3"),
         ("ipykernel", "py3;py<38"),
-        ("ipykernel", "py38"),
+        ("ipykernel", "py>=38;py<310"),
+        ("ipykernel", "py>=310"),
         ("jupyter-client", "py<35"),
         ("jupyter-client", "py==35"),
-        ("jupyter-client", "py36"),
+        ("jupyter-client", "py>=36"),
         ("jedi", "py<39"),
-        ("jedi", "py39"),
+        ("jedi", "py>=39"),
         ("pywinpty", "py<3;windows"),
     ),
     "jupyter": (
         "jupyter",
         ("jupyter-console", "py<35"),
         ("jupyter-console", "py>=35;py<37"),
-        ("jupyter-console", "py37"),
+        ("jupyter-console", "py>=37"),
         "papermill",
     ),
     "jupyterlab": (
@@ -1041,14 +1042,14 @@ all_reqs = {
     "numpy": (
         ("numpy", "py<3;cpy"),
         ("numpy", "py34;py<39"),
-        ("numpy", "py39"),
+        ("numpy", "py>=39"),
         ("pandas", "py36"),
         ("xarray", "py39"),
     ),
     "tests": (
         ("pytest", "py<36"),
         ("pytest", "py>=36;py<38"),
-        ("pytest", "py38"),
+        ("pytest", "py>=38"),
         "pexpect",
         "pytest_remotedata",  # fixes a pytest error
     ),
@@ -1068,21 +1069,20 @@ unpinned_min_versions = {
     "requests": (2, 32),
     ("xarray", "py39"): (2025,),
     ("dataclasses", "py==36"): (0, 8),
-    ("aenum", "py<34"): (3, 1, 15),
+    ("aenum", "py<34"): (3, 1, 16),
     "pydata-sphinx-theme": (0, 16),
     "myst-parser": (4,),
-    "sphinx": (8,),
     "sphinxcontrib_applehelp": (2,),
     "sphinxcontrib_htmlhelp": (2,),
-    "mypy[python2]": (1, 15),
+    "mypy[python2]": (1, 19),
     "pyright": (1, 1),
-    ("jupyter-console", "py37"): (6, 6),
+    ("jupyter-console", "py>=37"): (6, 6),
     ("typing", "py<35"): (3, 10),
-    ("typing_extensions", "py>=38"): (4, 13),
-    ("ipykernel", "py38"): (6,),
-    ("jedi", "py39"): (0, 19),
+    ("typing_extensions", "py>=38"): (4, 14),
+    ("ipykernel", "py>=310"): (7,),
+    ("jedi", "py>=39"): (0, 19),
     ("pygments", "py>=39"): (2, 19),
-    ("xonsh", "py39"): (0, 19),
+    ("xonsh", "py39"): (0, 22),
     ("async_generator", "py35"): (1, 10),
     ("exceptiongroup", "py37;py<311"): (1,),
     ("ipython", "py>=310"): (9,),
@@ -1090,14 +1090,17 @@ unpinned_min_versions = {
 }
 
 pinned_min_versions = {
+    # don't upgrade this; it breaks myst-parser
+    "sphinx": (8,),
     # don't upgrade this; some extensions implicitly require numpy<2
-    ("numpy", "py39"): (1, 26),
+    ("numpy", "py>=39"): (1, 26),
     # don't upgrade this; it breaks xonsh
-    ("pytest", "py38"): (8, 0),
+    ("pytest", "py>=38"): (8, 0),
     # don't upgrade these; they break on Python 3.9
     ("numpy", "py34;py<39"): (1, 18),
     ("ipython", "py==39"): (8, 18),
     # don't upgrade these; they break on Python 3.8
+    ("ipykernel", "py>=38;py<310"): (6,),
     ("ipython", "py==38"): (8, 12),
     # don't upgrade these; they break on Python 3.7
     ("ipython", "py==37"): (7, 34),
@@ -1106,7 +1109,7 @@ pinned_min_versions = {
     ("anyio", "py36"): (3,),
     ("xonsh", "py>=36;py<39"): (0, 11),
     ("pandas", "py36"): (1, 1),
-    ("jupyter-client", "py36"): (7, 1, 2),
+    ("jupyter-client", "py>=36"): (7, 1, 2),
     ("typing_extensions", "py==36"): (4, 1),
     ("pytest", "py>=36;py<38"): (7,),
     # don't upgrade these; they break on Python 3.5
@@ -1161,7 +1164,7 @@ max_versions = {
     ("jedi", "py<39"): _,
     ("pywinpty", "py<3;windows"): _,
     ("ipython", "py3;py<37"): _,
-    ("pytest", "py38"): _,
+    ("pytest", "py>=38"): _,
 }
 
 classifiers = (

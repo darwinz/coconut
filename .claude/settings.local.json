@@ -6,7 +6,8 @@
       "Bash(make test:*)",
       "Bash(python:*)",
       "Bash(xonsh:*)",
-      "WebFetch(domain:coconut.readthedocs.io)"
+      "WebFetch(domain:coconut.readthedocs.io)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

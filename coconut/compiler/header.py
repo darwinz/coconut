@@ -766,17 +766,6 @@ asyncio_Return = StopIteration
             ''',
             indent=1,
         ),
-        import_tstr=pycondition(
-            (3, 14),
-            if_lt='''
-try:
-    import tstr
-except ImportError as tstr_import_err:
-    tstr = _coconut_missing_module(tstr_import_err)
-            ''',
-            if_ge='',
-            indent=1,
-        ),
         class_amap=pycondition(
             (3, 3),
             if_lt='''

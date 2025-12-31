@@ -824,9 +824,11 @@ def run_pyprover(**kwargs):
 def comp_prelude(args=[], **kwargs):
     """Compiles evhub/coconut-prelude."""
     call(["git", "clone", prelude_git])
-    if MYPY and not WINDOWS:
-        args.extend(["--target", "3.5", "--mypy"])
-        kwargs["check_errors"] = False
+    # disabled --mypy: was causing test_prelude to take ~5 hours due to
+    # extremely slow mypy type-checking on the coconut-prelude package
+    # if MYPY and not WINDOWS:
+    #     args.extend(["--target", "3.5", "--mypy"])
+    #     kwargs["check_errors"] = False
     call_coconut([os.path.join(prelude, "setup.coco"), "--force"] + args, **kwargs)
     call_coconut([os.path.join(prelude, "prelude-source"), os.path.join(prelude, "prelude"), "--force"] + args, **kwargs)
 

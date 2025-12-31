@@ -1,6 +1,6 @@
 repos:
--   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v2.0.4
+-   repo: https://github.com/hhatto/autopep8
+    rev: v2.3.2
     hooks:
     -   id: autopep8
         args:
@@ -10,11 +10,10 @@ repos:
         - --experimental
         - --ignore=W503,E501,E722,E402,E721
 -   repo: https://github.com/pre-commit/pre-commit-hooks.git
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
     -   id: check-added-large-files
     -   id: fix-byte-order-marker
-    -   id: fix-encoding-pragma
     -   id: check-executables-have-shebangs
     -   id: check-merge-conflict
     -   id: check-case-conflict
@@ -34,7 +33,7 @@ repos:
         args:
         - --autofix
 -   repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
+    rev: 7.3.0
     hooks:
     -   id: flake8
         args:

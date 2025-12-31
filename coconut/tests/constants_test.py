@@ -29,6 +29,7 @@ from coconut.constants import (
     PYPY,
     PY26,
     PY39,
+    PY313,
     fixpath,
 )
 
@@ -80,8 +81,9 @@ class TestConstants(unittest.TestCase):
 
     def test_defaults(self):
         assert constants.use_fast_pyparsing_reprs
-        assert not constants.embed_on_internal_exc
         assert constants.num_assemble_logical_lines_tries >= 1
+        assert not constants.embed_on_internal_exc
+        assert not constants.test_computation_graph_pickling
 
     def test_fixpath(self):
         assert os.path.basename(fixpath("CamelCase.py")) == "CamelCase.py"
@@ -94,7 +96,7 @@ class TestConstants(unittest.TestCase):
                 assert_hashable_or_dict(name, value)
 
     def test_imports(self):
-        for new_imp, (old_imp, ver_cutoff) in constants.py3_to_py2_stdlib.items():
+        for new_imp, (old_imp, ver_cutoff) in constants.new_to_old_stdlib.items():
             if "/" in old_imp:
                 new_imp, old_imp = new_imp.split(".", 1)[0], old_imp.split("./", 1)[0]
             if (
@@ -110,6 +112,8 @@ class TestConstants(unittest.TestCase):
                 or old_imp.startswith(("typing_extensions", "async_generator"))
                 # don't test _dummy_thread on Py3.9
                 or PY39 and new_imp == "_dummy_thread"
+                # don't test tix on Python 3.13+
+                or PY313 and new_imp == "tkinter.tix"
             ):
                 pass
             elif sys.version_info >= ver_cutoff:

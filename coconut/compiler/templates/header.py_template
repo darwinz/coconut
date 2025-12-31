@@ -27,6 +27,10 @@ class _coconut{object}:{COMMENT.EVERYTHING_HERE_MUST_BE_COPIED_TO_STUB_FILE}
         import async_generator
     except ImportError as async_generator_import_err:
         async_generator = _coconut_missing_module(async_generator_import_err)
+    try:
+        import tstr
+    except ImportError as tstr_import_err:
+        tstr = _coconut_missing_module(tstr_import_err)
 {import_pickle}
 {import_OrderedDict}
 {import_collections_abc}
@@ -966,7 +970,7 @@ class thread_map(_coconut_base_parallel_map):
     _threadlocal_ns = _coconut.threading.local()
     @staticmethod
     def _make_pool(max_workers=None):
-        return _coconut.multiprocessing_dummy.Pool(_coconut.multiprocessing.{process_}cpu_count() * 5 if max_workers is None else max_workers)
+        return _coconut.multiprocessing_dummy.Pool({cpu_count} * 5 if max_workers is None else max_workers)
 class zip(_coconut_baseclass, _coconut.zip):
     __slots__ = ("iters", "strict")
     __doc__ = getattr(_coconut.zip, "__doc__", "<see help(py_zip)>")
@@ -1643,17 +1647,46 @@ def fmap(func, obj, **kwargs):
     else:
         mapped_obj = _coconut_map(func, obj)
     return _coconut_base_makedata(obj.__class__, mapped_obj, from_fmap=True, fallback_to_init=fallback_to_init)
-def _coconut_memoize_helper(maxsize=None, typed=False):
-    return maxsize, typed
 def memoize(*args, **kwargs):
     """Decorator that memoizes a function, preventing it from being recomputed
     if it is called multiple times with the same arguments."""
     if not kwargs and _coconut.len(args) == 1 and _coconut.callable(args[0]):
-        return _coconut.functools.lru_cache(maxsize=None)(args[0])
+        return _coconut_memoize_helper()(args[0])
     if _coconut.len(kwargs) == 1 and "user_function" in kwargs and _coconut.callable(kwargs["user_function"]):
-        return _coconut.functools.lru_cache(maxsize=None)(kwargs["user_function"])
-    maxsize, typed = _coconut_memoize_helper(*args, **kwargs)
-    return _coconut.functools.lru_cache(maxsize, typed)
+        return _coconut_memoize_helper()(kwargs["user_function"])
+    return _coconut_memoize_helper(*args, **kwargs)
+memoize.RECURSIVE = _coconut_Sentinel()
+def _coconut_memoize_helper(maxsize=None, typed=False):
+    if maxsize is memoize.RECURSIVE:
+        def memoizer(func):
+            """memoize(...)"""
+            inside = [False]
+            cache = {empty_dict}
+            @_coconut_wraps(func)
+            def memoized_func(*args, **kwargs):
+                if typed:
+                    key = (_coconut.tuple((x, _coconut.type(x)) for x in args), _coconut.tuple((k, _coconut.type(k), v, _coconut.type(v)) for k, v in kwargs.items()))
+                else:
+                    key = (args, _coconut.tuple(kwargs.items()))
+                got = cache.get(key, _coconut_sentinel)
+                if got is not _coconut_sentinel:
+                    return got
+                outer_inside, inside[0] = inside[0], True
+                try:
+                    got = func(*args, **kwargs)
+                    cache[key] = got
+                    return got
+                finally:
+                    inside[0] = outer_inside
+                    if not inside[0]:
+                        cache.clear()
+            memoized_func.__module__ = _coconut.getattr(func, "__module__", None)
+            memoized_func.__name__ = _coconut.getattr(func, "__name__", None)
+            memoized_func.__qualname__ = _coconut.getattr(func, "__qualname__", None)
+            return memoized_func
+        return memoizer
+    else:
+        return _coconut.functools.lru_cache(maxsize, typed)
 {def_call_set_names}
 class override(_coconut_baseclass):
     """Declare a method in a subclass as an override of a parent class method.

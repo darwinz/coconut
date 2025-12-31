@@ -65,6 +65,7 @@ def run_main(outer_MatchError, test_easter_eggs=False) -> bool:
         py36_spec_test,
         py37_spec_test,
         py38_spec_test,
+        py310_spec_test,
     )
     if sys.version_info >= (2, 7):
         assert non_py26_test() is True
@@ -80,6 +81,8 @@ def run_main(outer_MatchError, test_easter_eggs=False) -> bool:
         assert py37_spec_test() is True
     if sys.version_info >= (3, 8):
         assert py38_spec_test() is True
+    if sys.version_info >= (3, 10):
+        assert py310_spec_test() is True
 
     print_dot()  # .....
     from .suite import suite_test, tco_test
@@ -112,6 +115,11 @@ def run_main(outer_MatchError, test_easter_eggs=False) -> bool:
         if sys.version_info >= (3, 11):
             from .py311_test import py311_test
             assert py311_test() is True
+        if sys.version_info >= (3, 14):
+            # use dynamic import to avoid MyPy parsing t-string syntax on older Python
+            from importlib import import_module
+            py314_test = import_module(".py314_test", __package__).py314_test
+            assert py314_test() is True
 
     print_dot()  # ........
     from .target_sys_test import TEST_ASYNCIO, target_sys_test

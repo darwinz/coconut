@@ -202,12 +202,12 @@ class CoconutImporter(object):
     command = None
 
     def __init__(self, *args):
-        self.use_cache_dir(default_use_cache_dir)
         self.set_args(args)
+        self.use_cache_dir(default_use_cache_dir)
 
     def use_cache_dir(self, use_cache_dir):
         """Set the cache directory if any to use for compiled Coconut files."""
-        if use_cache_dir:
+        if use_cache_dir and "--no-cache" not in self.args:
             if not PY34:
                 raise CoconutException("coconut.api.auto_compilation only supports the usage of a cache directory on Python 3.4+")
             self.cache_dir = coconut_cache_dir
@@ -238,7 +238,10 @@ class CoconutImporter(object):
 
         if package:
             self.cmd(path, *extra_args)
-            return cache_dir or path
+            if cache_dir:
+                return os.path.join(cache_dir, "__init__.py")
+            else:
+                return path
         else:
             destpath, = self.cmd(path, *extra_args)
             return destpath

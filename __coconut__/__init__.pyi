@@ -206,6 +206,7 @@ _coconut_zip = zip
 
 zip_longest = _coconut.zip_longest
 memoize = _lru_cache
+memoize.RECURSIVE = None  # type: ignore
 reduce = _coconut.functools.reduce
 takewhile = _coconut.itertools.takewhile
 dropwhile = _coconut.itertools.dropwhile

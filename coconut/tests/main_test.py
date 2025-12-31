@@ -136,11 +136,13 @@ pyston = os.path.join(os.curdir, "pyston")
 pyprover = os.path.join(os.curdir, "pyprover")
 prelude = os.path.join(os.curdir, "coconut-prelude")
 bbopt = os.path.join(os.curdir, "bbopt")
+imp_issue_dir = os.path.join(os.curdir, "coconut-issue")
 
 pyston_git = "https://github.com/evhub/pyston.git"
 pyprover_git = "https://github.com/evhub/pyprover.git"
 prelude_git = "https://github.com/evhub/coconut-prelude"
 bbopt_git = "https://github.com/evhub/bbopt.git"
+imp_issue_git = "https://github.com/evhub/coconut-issue.git"
 
 coconut_snip = "msg = '<success>'; pmsg = print$(msg); `pmsg`"
 target_3_snip = "assert super is py_super; print('<success>')"
@@ -180,13 +182,13 @@ ignore_atexit_errors_with = (
 ignore_last_lines_with = (
     "DeprecationWarning: The distutils package is deprecated",
     "from distutils.version import LooseVersion",
-    ": SyntaxWarning: 'int' object is not ",
     ": CoconutWarning: Deprecated use of ",
-    "  assert_raises(",
-    "  assert ",
     "Populating initial parsing cache",
     "_coconut.warnings.warn(",
-    ": SyntaxWarning: invalid escape sequence",
+    ": SyntaxWarning: ",
+    "  assert_raises(",
+    "  assert ",
+    "  if x is 1:",
 )
 
 kernel_installation_msg = (
@@ -657,6 +659,19 @@ def comp_311(args=[], always_sys=False, **kwargs):
     comp(path="cocotest", folder="target_311", args=["--target", "311" if not always_sys else "sys"] + args, **kwargs)
 
 
+def comp_314(args=[], always_sys=False, **kwargs):
+    """Compiles target_314."""
+    # remove --mypy checking when running on Python 3.14 since MyPy can't parse t-strings
+    if sys.version_info < (3, 14):
+        try:
+            mypy_ind = args.index("--mypy")
+        except ValueError:
+            pass
+        else:
+            args = args[:mypy_ind]
+    comp(path="cocotest", folder="target_314", args=["--target", "314" if not always_sys else "sys"] + args, **kwargs)
+
+
 def comp_sys(args=[], **kwargs):
     """Compiles target_sys."""
     comp(path="cocotest", folder="target_sys", args=["--target", "sys"] + args, **kwargs)
@@ -717,6 +732,8 @@ def run(
                         comp_38(args, **spec_kwargs)
                     if sys.version_info >= (3, 11):
                         comp_311(args, **spec_kwargs)
+                    if sys.version_info >= (3, 14):
+                        comp_314(args, **spec_kwargs)
 
                 if not run_directory:
                     comp_agnostic(agnostic_args, **kwargs)
@@ -774,6 +791,7 @@ def comp_all(args=[], agnostic_target=None, **kwargs):
     comp_36(args, **kwargs)
     comp_38(args, **kwargs)
     comp_311(args, **kwargs)
+    comp_314(args, **kwargs)
     comp_sys(args, **kwargs)
     # do non-strict at the end so we get the non-strict header
     comp_non_strict(args, **kwargs)
@@ -806,9 +824,11 @@ def run_pyprover(**kwargs):
 def comp_prelude(args=[], **kwargs):
     """Compiles evhub/coconut-prelude."""
     call(["git", "clone", prelude_git])
-    if MYPY and not WINDOWS:
-        args.extend(["--target", "3.5", "--mypy"])
-        kwargs["check_errors"] = False
+    # disabled --mypy: was causing test_prelude to take ~5 hours due to
+    # extremely slow mypy type-checking on the coconut-prelude package
+    # if MYPY and not WINDOWS:
+    #     args.extend(["--target", "3.5", "--mypy"])
+    #     kwargs["check_errors"] = False
     call_coconut([os.path.join(prelude, "setup.coco"), "--force"] + args, **kwargs)
     call_coconut([os.path.join(prelude, "prelude-source"), os.path.join(prelude, "prelude"), "--force"] + args, **kwargs)
 
@@ -1097,12 +1117,6 @@ if TEST_ALL:
                     if MYPY and PY38:
                         run_prelude()
 
-        def test_bbopt(self):
-            with using_paths(bbopt):
-                comp_bbopt()
-                if not PYPY and PY38 and not PY310:
-                    install_bbopt()
-
         # def test_pyprover(self):
         #     with using_paths(pyprover):
         #         comp_pyprover()
@@ -1110,11 +1124,25 @@ if TEST_ALL:
         #             run_pyprover()
 
         if PY312:  # reduce test load
+
+            def test_bbopt(self):
+                with using_paths(bbopt):
+                    comp_bbopt()
+                    if not PYPY and PY38 and not PY310:
+                        install_bbopt()
+
             def test_pyston(self):
                 with using_paths(pyston):
                     comp_pyston(["--no-tco"])
                     if PYPY and PY2:
                         run_pyston()
+
+        def test_imp_issue(self):
+            with using_paths(imp_issue_dir):
+                if not os.path.exists(imp_issue_dir):
+                    call(["git", "clone", imp_issue_git])
+                with using_env_vars({"PYTHONPATH": os.pathsep.join([imp_issue_dir, os.environ.get("PYTHONPATH", "")])}):
+                    call_coconut(["-r", os.path.join(imp_issue_dir, "main.coco")])
 
 
 # -----------------------------------------------------------------------------------------------------------------------

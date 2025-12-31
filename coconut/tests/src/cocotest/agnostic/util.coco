@@ -1346,24 +1346,34 @@ def sum2(ab) = a + b where:
 # Memoization
 import functools
 
-@memoize()
-def ridiculously_recursive(n):
+@memoize(None)
+def ridiculously_recursive1(n):
     """Requires maxsize=None when called on large numbers."""
     if n <= 0:
         return 1
     result = 0
     for i in range(1, 200):
-        result += ridiculously_recursive(n-i)
+        result += ridiculously_recursive1(n-i)
     return result
 
 @functools.lru_cache(maxsize=None)  # type: ignore
-def ridiculously_recursive_(n):
+def ridiculously_recursive2(n):
     """Requires maxsize=None when called on large numbers."""
     if n <= 0:
         return 1
     result = 0
     for i in range(1, 200):
-        result += ridiculously_recursive_(n-i)
+        result += ridiculously_recursive2(n-i)
+    return result
+
+@memoize(memoize.RECURSIVE)  # type: ignore
+def ridiculously_recursive3(n):
+    """Requires maxsize=None when called on large numbers."""
+    if n <= 0:
+        return 1
+    result = 0
+    for i in range(1, 200):
+        result += ridiculously_recursive3(n-i)
     return result
 
 def fib(n if n < 2) = n

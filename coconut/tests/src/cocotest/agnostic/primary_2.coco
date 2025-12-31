@@ -491,6 +491,24 @@ def primary_test_2() -> bool:
     assert reduce(function=(+), iterable=range(5), initial=-1) == 9  # type: ignore
     assert takewhile(predicate=ident, iterable=[1, 2, 1, 0, 1]) |> list == [1, 2, 1]  # type: ignore
     assert dropwhile(predicate=(not), iterable=range(5)) |> list == [1, 2, 3, 4]  # type: ignore
+    assert type(1) == int
+    assert type(b"") == bytes
+    @memoize(typed=True)
+    def typed_memoized_func(x):
+        if x is 1:
+            return None
+        else:
+            return (x, typed_memoized_func(1))
+    assert typed_memoized_func(1.0) == (1.0, None)
+    assert typed_memoized_func(1.0)[0] |> type == float
+    @memoize(memoize.RECURSIVE, typed=True)  # type: ignore
+    def recursive_typed_memoized_func(x=None):
+        if x is None:
+            return (recursive_typed_memoized_func(1), recursive_typed_memoized_func(1.0))
+        return x
+    assert recursive_typed_memoized_func() |> map$(type) |> tuple == (int, float)
+    assert -1 ?↦ abs == 1
+    assert None ?↦ abs is None
 
     with process_map.multiple_sequential_calls():  # type: ignore
         assert map((+), range(3), range(4)$[:-1], strict=True) |> list == [0, 2, 4] == process_map((+), range(3), range(4)$[:-1], strict=True) |> list  # type: ignore

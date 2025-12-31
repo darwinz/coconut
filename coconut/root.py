@@ -23,7 +23,7 @@ import sys as _coconut_sys
 # VERSION:
 # -----------------------------------------------------------------------------------------------------------------------
 
-VERSION = "3.1.2"
+VERSION = "3.2.0"
 VERSION_NAME = None
 # False for release, int >= 1 for develop
 DEVELOP = False
@@ -107,6 +107,12 @@ class int(_coconut_py_int):
             return _coconut.isinstance(inst, (_coconut_py_int, _coconut_py_long))
         def __subclasscheck__(cls, subcls):
             return _coconut.issubclass(subcls, (_coconut_py_int, _coconut_py_long))
+        def __eq__(cls, other):
+            if other is _coconut_py_int or other is _coconut_py_long:
+                return True
+            return _coconut.type.__eq__(cls, other)
+        def __hash__(cls):
+            return _coconut.hash(_coconut_py_int)
 class bytes(_coconut_py_bytes):
     __slots__ = ()
     __doc__ = getattr(_coconut_py_bytes, "__doc__", "<see help(py_bytes)>")
@@ -115,6 +121,12 @@ class bytes(_coconut_py_bytes):
             return _coconut.isinstance(inst, _coconut_py_bytes)
         def __subclasscheck__(cls, subcls):
             return _coconut.issubclass(subcls, _coconut_py_bytes)
+        def __eq__(cls, other):
+            if other is _coconut_py_bytes:
+                return True
+            return _coconut.type.__eq__(cls, other)
+        def __hash__(cls):
+            return _coconut.hash(_coconut_py_bytes)
     def __new__(self, *args):
         if not args:
             return b""
@@ -469,10 +481,10 @@ if PY2:
 else:
     import builtins as _coconut  # NOQA
 
-import pickle
-_coconut.pickle = pickle
+import pickle as _pickle
+_coconut.pickle = _pickle
 
-import os
-_coconut.os = os
+import os as _os
+_coconut.os = _os
 
 exec(_get_root_header())

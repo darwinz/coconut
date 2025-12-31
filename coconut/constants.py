@@ -26,6 +26,7 @@ import platform
 import re
 import datetime as dt
 from warnings import warn
+from collections import defaultdict
 
 # -----------------------------------------------------------------------------------------------------------------------
 # UTILITIES:
@@ -83,14 +84,16 @@ PY39 = sys.version_info >= (3, 9)
 PY310 = sys.version_info >= (3, 10)
 PY311 = sys.version_info >= (3, 11)
 PY312 = sys.version_info >= (3, 12)
+PY313 = sys.version_info >= (3, 13)
+PY314 = sys.version_info >= (3, 14)
 IPY = (
     PY36
-    and (PY37 or not PYPY)
+    and (PY311 or not PYPY)
     and not (PYPY and WINDOWS)
     and sys.version_info[:2] != (3, 7)
 )
 MYPY = (
-    PY38
+    PY39
     and not WINDOWS
     and not PYPY
     # TODO: disabled until MyPy supports PEP 695
@@ -172,11 +175,16 @@ use_left_recursion_if_available = False
 # COMPILER CONSTANTS:
 # -----------------------------------------------------------------------------------------------------------------------
 
-# set this to True only ever temporarily for ease of debugging
+# set these to True only ever temporarily for ease of debugging
 embed_on_internal_exc = get_bool_env_var("COCONUT_EMBED_ON_INTERNAL_EXC", False)
+test_computation_graph_pickling = False
 
 # should be the minimal ref count observed by maybe_copy_elem
-temp_grammar_item_ref_count = 4 if PY311 else 5
+min_observed_ref_count = (
+    defaultdict(lambda: 2, attach=1) if PY314
+    else 4 if PY311
+    else 5
+)
 
 minimum_recursion_limit = 128
 # shouldn't be raised any higher to avoid stack overflows
@@ -462,7 +470,7 @@ untcoable_funcs = (
     r"typing\.[a-zA-Z0-9_.]+",
 )
 
-py3_to_py2_stdlib = {
+new_to_old_stdlib = {
     # new_name: (old_name, before_version_info)
     "builtins": ("__builtin__", (3,)),
     "configparser": ("ConfigParser", (3,)),
@@ -569,6 +577,7 @@ py3_to_py2_stdlib = {
     "typing.Self": ("typing_extensions./Self", (3, 11)),
     "typing.TypeVarTuple": ("typing_extensions./TypeVarTuple", (3, 11)),
     "typing.Unpack": ("typing_extensions./Unpack", (3, 11)),
+    "typing.TypeForm": ("typing_extensions./TypeForm", (3, 14)),
 }
 
 import_existing = {
@@ -932,7 +941,7 @@ author_email = "evanjhub@gmail.com"
 description = "Simple, elegant, Pythonic functional programming."
 website_url = "http://coconut-lang.org"
 
-license_name = "Apache 2.0"
+license_name = "Apache-2.0"
 
 pure_python_env_var = "COCONUT_PURE_PYTHON"
 PURE_PYTHON = get_bool_env_var(pure_python_env_var, False)
@@ -942,7 +951,8 @@ PURE_PYTHON = get_bool_env_var(pure_python_env_var, False)
 all_reqs = {
     "main": (
         ("argparse", "py<27"),
-        ("psutil", "py>=27"),
+        ("psutil", "py>=27;py<3"),
+        ("psutil", "py3"),
         ("futures", "py<3"),
         ("backports.functools-lru-cache", "py<3"),
         ("prompt_toolkit", "py<3"),
@@ -952,12 +962,14 @@ all_reqs = {
         ("typing_extensions", "py<36"),
         ("typing_extensions", "py==36"),
         ("typing_extensions", "py==37"),
-        ("typing_extensions", "py>=38"),
+        ("typing_extensions", "py==38"),
+        ("typing_extensions", "py>=39"),
         ("trollius", "py<3;cpy"),
         ("aenum", "py<34"),
         ("dataclasses", "py==36"),
         ("typing", "py<35"),
         ("async_generator", "py35"),
+        ("tstr", "py310"),
         ("exceptiongroup", "py37;py<311"),
         ("anyio", "py36"),
         "setuptools",
@@ -973,23 +985,24 @@ all_reqs = {
         ("ipython", "py3;py<37"),
         ("ipython", "py==37"),
         ("ipython", "py==38"),
-        ("ipython", "py==39"),
-        ("ipython", "py>=310"),
+        ("ipython", "py>=39;py<311"),
+        ("ipython", "py>=311"),
         ("ipykernel", "py<3"),
         ("ipykernel", "py3;py<38"),
-        ("ipykernel", "py38"),
+        ("ipykernel", "py>=38;py<310"),
+        ("ipykernel", "py>=310"),
         ("jupyter-client", "py<35"),
         ("jupyter-client", "py==35"),
-        ("jupyter-client", "py36"),
+        ("jupyter-client", "py>=36"),
         ("jedi", "py<39"),
-        ("jedi", "py39"),
+        ("jedi", "py>=39"),
         ("pywinpty", "py<3;windows"),
     ),
     "jupyter": (
         "jupyter",
         ("jupyter-console", "py<35"),
         ("jupyter-console", "py>=35;py<37"),
-        ("jupyter-console", "py37"),
+        ("jupyter-console", "py>=37"),
         "papermill",
     ),
     "jupyterlab": (
@@ -1013,8 +1026,8 @@ all_reqs = {
     ),
     "xonsh": (
         ("xonsh", "py<36"),
-        ("xonsh", "py>=36;py<39"),
-        ("xonsh", "py39"),
+        ("xonsh", "py>=36;py<311"),
+        ("xonsh", "py311"),
     ),
     "dev": (
         ("pre-commit", "py3"),
@@ -1035,14 +1048,14 @@ all_reqs = {
     "numpy": (
         ("numpy", "py<3;cpy"),
         ("numpy", "py34;py<39"),
-        ("numpy", "py39"),
+        ("numpy", "py>=39"),
         ("pandas", "py36"),
-        ("xarray", "py39"),
+        ("xarray", "py310"),
     ),
     "tests": (
         ("pytest", "py<36"),
         ("pytest", "py>=36;py<38"),
-        ("pytest", "py38"),
+        ("pytest", "py>=38"),
         "pexpect",
         "pytest_remotedata",  # fixes a pytest error
     ),
@@ -1050,9 +1063,9 @@ all_reqs = {
 
 # min versions are inclusive
 unpinned_min_versions = {
-    "cPyparsing": (2, 4, 7, 2, 4, 0),
-    ("pre-commit", "py3"): (3,),
-    ("psutil", "py>=27"): (6,),
+    "cPyparsing": (2, 4, 7, 2, 4, 1),
+    ("pre-commit", "py3"): (4,),
+    ("psutil", "py3"): (7,),
     "jupyter": (1, 1),
     "types-backports": (0, 1),
     ("futures", "py<3"): (3, 4),
@@ -1060,47 +1073,53 @@ unpinned_min_versions = {
     "pexpect": (4,),
     ("trollius", "py<3;cpy"): (2, 2),
     "requests": (2, 32),
-    ("xarray", "py39"): (2024,),
+    ("xarray", "py310"): (2025,),
     ("dataclasses", "py==36"): (0, 8),
-    ("aenum", "py<34"): (3, 1, 15),
-    "pydata-sphinx-theme": (0, 15),
+    ("aenum", "py<34"): (3, 1, 16),
+    "pydata-sphinx-theme": (0, 16),
     "myst-parser": (4,),
-    "sphinx": (8,),
     "sphinxcontrib_applehelp": (2,),
     "sphinxcontrib_htmlhelp": (2,),
-    "mypy[python2]": (1, 11),
     "pyright": (1, 1),
-    ("jupyter-console", "py37"): (6, 6),
+    ("jupyter-console", "py>=37"): (6, 6),
     ("typing", "py<35"): (3, 10),
-    ("typing_extensions", "py>=38"): (4, 12),
-    ("ipykernel", "py38"): (6,),
-    ("jedi", "py39"): (0, 19),
-    ("pygments", "py>=39"): (2, 18),
-    ("xonsh", "py39"): (0, 18),
+    ("ipykernel", "py>=310"): (7,),
+    ("jedi", "py>=39"): (0, 19),
+    ("pygments", "py>=39"): (2, 19),
+    ("xonsh", "py311"): (0, 22),
     ("async_generator", "py35"): (1, 10),
+    ("tstr", "py310"): (0, 4),
     ("exceptiongroup", "py37;py<311"): (1,),
-    ("ipython", "py>=310"): (8, 27),
-    "py-spy": (0, 3),
+    ("ipython", "py>=311"): (9,),
+    "py-spy": (0, 4),
+    # whenever this is upgraded, it means we also need to add the new stuff to new_to_old_stdlib
+    ("typing_extensions", "py>=39"): (4, 15),
+    # if this breaks, instead of making it version-specific, just change the MYPY flag above
+    "mypy[python2]": (1, 19),
 }
 
 pinned_min_versions = {
+    # don't upgrade this; it breaks myst-parser
+    "sphinx": (8,),
     # don't upgrade this; some extensions implicitly require numpy<2
-    ("numpy", "py39"): (1, 26),
+    ("numpy", "py>=39"): (1, 26),
     # don't upgrade this; it breaks xonsh
-    ("pytest", "py38"): (8, 0),
+    ("pytest", "py>=38"): (8, 0),
     # don't upgrade these; they break on Python 3.9
     ("numpy", "py34;py<39"): (1, 18),
-    ("ipython", "py==39"): (8, 18),
+    ("ipython", "py>=39;py<311"): (8, 18),
     # don't upgrade these; they break on Python 3.8
+    ("ipykernel", "py>=38;py<310"): (6,),
     ("ipython", "py==38"): (8, 12),
+    ("typing_extensions", "py==38"): (4, 12),
     # don't upgrade these; they break on Python 3.7
     ("ipython", "py==37"): (7, 34),
     ("typing_extensions", "py==37"): (4, 7),
     # don't upgrade these; they break on Python 3.6
     ("anyio", "py36"): (3,),
-    ("xonsh", "py>=36;py<39"): (0, 11),
+    ("xonsh", "py>=36;py<311"): (0, 11),
     ("pandas", "py36"): (1, 1),
-    ("jupyter-client", "py36"): (7, 1, 2),
+    ("jupyter-client", "py>=36"): (7, 1, 2),
     ("typing_extensions", "py==36"): (4, 1),
     ("pytest", "py>=36;py<38"): (7,),
     # don't upgrade these; they break on Python 3.5
@@ -1127,6 +1146,7 @@ pinned_min_versions = {
     ("jupyter-console", "py<35"): (5, 2),
     ("ipython", "py<3"): (5, 4),
     ("ipykernel", "py<3"): (4, 10),
+    ("psutil", "py>=27;py<3"): (6,),
     ("prompt_toolkit", "py<3"): (1,),
     "watchdog": (0, 10),
     "papermill": (1, 2),
@@ -1155,12 +1175,11 @@ max_versions = {
     ("jedi", "py<39"): _,
     ("pywinpty", "py<3;windows"): _,
     ("ipython", "py3;py<37"): _,
-    ("pytest", "py38"): _,
+    ("pytest", "py>=38"): _,
 }
 
 classifiers = (
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: Apache Software License",
     "Intended Audience :: Developers",
     "Topic :: Software Development",
     "Topic :: Software Development :: Code Generators",

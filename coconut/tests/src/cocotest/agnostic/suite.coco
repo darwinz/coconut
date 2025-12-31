@@ -562,7 +562,10 @@ def suite_test() -> bool:
     assert plus1sqsum_all(1, 2) == 13 == plus1sqsum_all_(1, 2)  # type: ignore
     assert sum_list_range(10) == 45
     assert sum2([3, 4]) == 7
-    assert ridiculously_recursive(300) == 201666561657114122540576123152528437944095370972927688812965354745141489205495516550423117825 == ridiculously_recursive_(300)
+    with process_map.multiple_sequential_calls():
+        for ridiculously_recursive in (ridiculously_recursive1, ridiculously_recursive2, ridiculously_recursive3):
+            got = process_map(ridiculously_recursive, [300])
+            assert got == (201666561657114122540576123152528437944095370972927688812965354745141489205495516550423117825,), got
     assert [fib(n) for n in range(16)] == [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610] == [fib_(n) for n in range(16)]
     assert [fib_alt1(n) for n in range(16)] == [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610] == [fib_alt2(n) for n in range(16)]
     assert fib.cache_info().hits == 28

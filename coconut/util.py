@@ -39,6 +39,10 @@ else:
         from backports.functools_lru_cache import lru_cache
     except ImportError:
         lru_cache = None
+if sys.version_info >= (3,):
+    import pickle  # NOQA
+else:
+    import cPickle as pickle  # NOQA
 
 from coconut.root import _get_target_info
 from coconut.constants import (
@@ -107,6 +111,14 @@ class const(pickleable_obj):
         return self.value
 
 
+def create_method(func, obj, objtype):
+    """Universally create a new method object."""
+    if PY2:
+        return MethodType(func, obj, objtype)
+    else:
+        return MethodType(func, obj)
+
+
 class override(pickleable_obj):
     """Implementation of Coconut's @override for use within Coconut."""
     __slots__ = ("func",)
@@ -129,10 +141,7 @@ class override(pickleable_obj):
                 return self.func.__get__(obj, objtype)
         if obj is None:
             return self.func
-        if PY2:
-            return MethodType(self.func, obj, objtype)
-        else:
-            return MethodType(self.func, obj)
+        return create_method(self.func, obj, objtype)
 
     def __set_name__(self, obj, name):
         if not hasattr(super(obj, obj), name):
@@ -260,6 +269,7 @@ def memoize_with_exceptions(*memo_args, **memo_kwargs):
 
 class keydefaultdict(defaultdict, object):
     """Version of defaultdict that calls the factory with the key."""
+    __slots__ = ()
 
     def __missing__(self, key):
         self[key] = self.default_factory(key)
@@ -268,6 +278,7 @@ class keydefaultdict(defaultdict, object):
 
 class dictset(dict, object):
     """A set implemented using a dictionary to get ordering benefits."""
+    __slots__ = ()
 
     def __init__(self, items=()):
         super(dictset, self).__init__((x, True) for x in items)
@@ -277,6 +288,42 @@ class dictset(dict, object):
 
     def add(self, item):
         self[item] = True
+
+
+class staledict(dict, pickleable_obj):
+    """A dictionary that keeps track of staleness.
+
+    Initial elements are always marked as stale and pickling always prunes stale elements."""
+
+    def __init__(self, *args, **kwargs):
+        super(staledict, self).__init__(*args, **kwargs)
+        self.alive = set()
+
+    def __getitem__(self, key):
+        self.alive.add(key)
+        return super(staledict, self).__getitem__(key)
+
+    def __setitem__(self, key, value):
+        self.alive.add(key)
+        super(staledict, self).__setitem__(key, value)
+
+    def prune_stale(self):
+        """Remove all stale keys."""
+        for key in set(self.keys()) - self.alive:
+            del self[key]
+
+    def __reduce__(self):
+        self.prune_stale()
+        return (self.__class__, (dict(self),))
+
+    def update(self, other):
+        """Update with a dict or staledict."""
+        if isinstance(other, staledict):
+            new_alive = self.alive | other.alive
+            super(staledict, self).update(other)
+            self.alive = new_alive
+        else:
+            super(staledict, self).update(other)
 
 
 def assert_remove_prefix(inputstr, prefix, allow_no_prefix=False):

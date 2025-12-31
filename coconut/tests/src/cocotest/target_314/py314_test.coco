@@ -1,0 +1,35 @@
+def py314_test() -> bool:
+    """Performs Python-3.14-specific tests."""
+    # Test basic t-string
+    name = "World"
+    template = t"Hello {name}!"
+    assert type(template).__name__ == "Template"
+    assert template.strings == ("Hello ", "!")
+    assert len(template.interpolations) == 1
+    assert template.interpolations[0].value == "World"
+
+    # Test t-string with Coconut syntax
+    template2 = t"Result: {[1,2,3] |> len}"
+    assert template2.strings == ("Result: ", "")
+    assert template2.interpolations[0].value == 3
+
+    # Test t-string with = specifier (debug syntax)
+    x = 42
+    template3 = t"{x=}"
+    assert template3.interpolations[0].value == 42
+
+    # Test raw t-string
+    template4 = rt"\n{x}"
+    assert template4.strings == ("\\n", "")
+    assert template4.interpolations[0].value == 42
+
+    # Test multiple interpolations
+    a, b = 1, 2
+    template5 = t"{a} + {b} = {a + b}"
+    assert template5.strings == ("", " + ", " = ", "")
+    assert len(template5.interpolations) == 3
+    assert template5.interpolations[0].value == 1
+    assert template5.interpolations[1].value == 2
+    assert template5.interpolations[2].value == 3
+
+    return True

@@ -327,7 +327,7 @@ _Note: Periods are optional in target specifications, such that the target `27` 
 
 #### `strict` Mode
 
-If the `--strict` (`-s` for short) flag is enabled, Coconut will perform additional checks on the code being compiled. It is recommended that you use the `--strict` flag if you are starting a new Coconut project, as it will help you write cleaner code. Specifically, the extra checks done by `--strict` are:
+If the `--strict` (`-s` for short) flag is enabled, Coconut will perform additional checks on the code being compiled. It is recommended that you use the `--strict` flag if you are starting a new Coconut project, as it will help you write cleaner code. Almost all of these checks can be disabled on a line-by-line basis by adding `# NOQA` or `# noqa` comments. Specifically, the extra checks done by `--strict` are:
 
 - disabling deprecated features (making them entirely unavailable to code compiled with `--strict`),
 - errors instead of warnings on unused imports (unless they have a `# NOQA` or `# noqa` comment),
@@ -341,7 +341,6 @@ The style issues which will cause `--strict` to throw an error are:
 - use of `"hello" "world"` implicit string concatenation (use explicit `+` instead)
 - use of `from __future__` imports (Coconut does these automatically)
 - inheriting from `object` in classes (Coconut does this automatically)
-- semicolons at end of lines
 - use of `u` to denote Unicode strings (all Coconut strings are Unicode strings)
 - `f`-strings with no format expressions in them
 - commas after [statement lambdas](#statement-lambdas) (not recommended as it can be unclear whether the comma is inside or outside the lambda)
@@ -365,6 +364,7 @@ In addition to the newer Python features that Coconut can backport automatically
 - [`aenum`](https://pypi.org/project/aenum) for backporting [`enum`](https://docs.python.org/3/library/enum.html).
 - [`async_generator`](https://github.com/python-trio/async_generator) for backporting [`async` generators](https://peps.python.org/pep-0525/) and [`asynccontextmanager`](https://docs.python.org/3/library/contextlib.html#contextlib.asynccontextmanager).
 - [`trollius`](https://pypi.python.org/pypi/trollius) for backporting [`async`/`await`](https://docs.python.org/3/library/asyncio-task.html) and [`asyncio`](https://docs.python.org/3/library/asyncio.html).
+- [`tstr`](https://github.com/ilotoki0804/tstr) for backporting [template strings (`t"..."`)](https://peps.python.org/pep-0750/) on Python < 3.14.
 
 Note that, when distributing compiled Coconut code, if you use any of these backports, you'll need to make sure that the requisite backport module is included as a dependency.
 
@@ -505,9 +505,9 @@ Coconut integrates with [`xonsh`](https://xon.sh/) to allow the use of Coconut c
 
 For an example of using Coconut from `xonsh`:
 ```
-user@computer ~ $ xontrib load coconut
-user@computer ~ $ cd ./files
-user@computer ~ $ $(ls -la) |> .splitlines() |> len
+user@computer ~ @ xontrib load coconut
+user@computer ~ @ cd ./files
+user@computer ~ @ $(ls -la) |> .splitlines() |> len
 30
 ```
 
@@ -541,11 +541,11 @@ f x                    n/a
 +, -                   left
 <<, >>                 left
 &                      left
-&:                     yes
+&:                     both
 ^                      left
 |                      left
-::                     yes (lazy)
-..                     yes
+::                     both (lazy)
+..                     both
 a `b` c,               left (captures lambda)
   all custom operators
 ??                     left (short-circuits)
@@ -680,7 +680,7 @@ print(list(expnums))
 
 ### Pipes
 
-Coconut uses pipe operators for pipeline-style function application. All the operators have a precedence in-between function composition pipes and comparisons, and are left-associative. All operators also support in-place versions. The different operators are:
+Coconut uses pipe operators for pipeline-style function application. All the operators have a precedence directly below [function composition pipes](#function-composition) and above comparisons (see the [precedence table](#precedence)), and are left-associative. All operators also support in-place versions (e.g. `|>=`). The different operators are:
 ```coconut
 (|>)    => pipe forward
 (|*>)   => multiple-argument pipe forward
@@ -753,7 +753,7 @@ async def do_stuff(some_data):
 
 ### Function Composition
 
-Coconut has three basic function composition operators: `..`, `..>`, and `<..`. Both `..` and `<..` use math-style "backwards" function composition, where the first function is called last, while `..>` uses "forwards" function composition, where the first function is called first. Forwards and backwards function composition pipes cannot be used together in the same expression (unlike normal pipes) and have precedence in-between `None`-coalescing and normal pipes.
+Coconut has three basic function composition operators: `..`, `..>`, and `<..`. Both `..` and `<..` use math-style "backwards" function composition, where the first function is called last, while `..>` uses "forwards" function composition, where the first function is called first. Forwards and backwards function composition pipes cannot be used together in the same expression (unlike normal pipes) and have a precedence directly below [the `None`-coalescing operator `??`](#none-coalescing) and above normal [pipes](#pipes) (see the [precedence table](#precedence)).
 
 The `..>` and `<..` function composition pipe operators also have multi-arg, keyword, and None variants as with [normal pipes](#pipes). The full list of function composition pipe operators is:
 ```
@@ -968,7 +968,7 @@ Coconut provides `??` as a `None`-coalescing operator, similar to the `??` null-
 
 Coconut's `??` operator evaluates to its left operand if that operand is not `None`, otherwise its right operand. The expression `foo ?? bar` evaluates to `foo` as long as it isn't `None`, and to `bar` if it is. The `None`-coalescing operator is short-circuiting, such that if the left operand is not `None`, the right operand won't be evaluated. This allows the right operand to be a potentially expensive operation without incurring any unnecessary cost.
 
-The `None`-coalescing operator has a precedence in-between infix function calls and composition pipes, and is left-associative.
+The `None`-coalescing operator has a precedence directly below [infix function calls](#infix-functions) and above [composition pipes](#function-composition) (see the [precedence table](#precedence)), and is left-associative.
 
 ##### Example
 
@@ -1324,7 +1324,7 @@ point(1,2) |> (==)$(point(1,2)) |> print
 _Showcases matching to data types and the default equality operator. Values defined by the user with the `data` statement can be matched against and their contents accessed by specifically referencing arguments to the data type's constructor._
 
 ```coconut
-class Tree
+data Tree
 data Empty() from Tree
 data Leaf(n) from Tree
 data Node(l, r) from Tree
@@ -1338,7 +1338,7 @@ Empty() |> depth |> print
 Leaf(5) |> depth |> print
 Node(Leaf(2), Node(Empty(), Leaf(3))) |> depth |> print
 ```
-_Showcases how the combination of data types and match statements can be used to powerful effect to replicate the usage of algebraic data types in other functional programming languages._
+_Showcases how the combination of data types and match statements can be used to powerful effect to replicate the usage of algebraic data types in other functional programming languages. Note that for `Tree` to be used for each case rather than `Empty`/`Leaf`/`Node`, `Tree` needs to be a `data` type to ensure that [`data` matching rather than `class` matching](#semantics-specification) is performed._
 
 ```coconut
 def duplicate_first([x] + xs as l) =
@@ -3116,6 +3116,8 @@ _Note: Passing `--strict` disables deprecated features._
 
 Coconut provides `functools.lru_cache` as a built-in under the name `memoize` with the modification that the _maxsize_ parameter is set to `None` by default. `memoize` makes the use case of optimizing recursive functions easier, as a _maxsize_ of `None` is usually what is desired in that case.
 
+`memoize` also supports a special `maxsize=memoize.RECURSIVE` argument, which will allow the cache to grow without bound within a single call to the top-level function, but clear the cache after the top-level call returns.
+
 Use of `memoize` requires `functools.lru_cache`, which exists in the Python 3 standard library, but under Python 2 will require `pip install backports.functools_lru_cache` to function. Additionally, if on Python 2 and `backports.functools_lru_cache` is present, Coconut will patch `functools` such that `functools.lru_cache = backports.functools_lru_cache.lru_cache`.
 
 Note that, if the function to be memoized is a generator or otherwise returns an iterator, [`recursive_generator`](#recursive_generator) can also be used to achieve a similar effect, the use of which is required for recursive generators.
@@ -3377,8 +3379,11 @@ safe_call(might_raise_IOError).expect_error(IOError).result_or(10)
 
 To match against an `Expected`, just:
 ```
-Expected(res) = Expected("result")
-Expected(error=err) = Expected(error=TypeError())
+match some_expected:
+    case Expected(res):
+        print("result:", res)
+    case Expected(error=err):
+        print("error:", err)
 ```
 
 ##### Example
@@ -3406,7 +3411,7 @@ Additionally, if you are using [view patterns](#match), you might need to raise 
 
 In some cases where there are multiple Coconut packages installed at the same time, there may be multiple `MatchError`s defined in different packages. Coconut can perform some magic under the hood to make sure that all these `MatchError`s will seamlessly interoperate, but only if all such packages are compiled in [`--package` mode rather than `--standalone` mode](#compilation-modes).
 
-### `CoconutWarning`
+#### `CoconutWarning`
 
 `CoconutWarning` is the [`Warning`](https://docs.python.org/3/library/exceptions.html#Warning) subclass used for all runtime Coconut warnings; see [`warnings`](https://docs.python.org/3/library/warnings.html).
 
@@ -3464,13 +3469,13 @@ In Haskell, `fmap(func, obj)` takes a data type `obj` and returns a new data typ
 
 For `dict`, or any other `collections.abc.Mapping`, `fmap` will map over the mapping's `.items()` instead of the default iteration through its `.keys()`, with the new mapping reconstructed from the mapped over items. _Deprecated: `fmap$(starmap_over_mappings=True)` will `starmap` over the `.items()` instead of `map` over them._
 
-For asynchronous iterables, `fmap` will map asynchronously, making `fmap` equivalent in that case to
+For asynchronous iterables, `fmap` is equivalent to
 ```coconut_python
 async def fmap_over_async_iters(func, async_iter):
     async for item in async_iter:
         yield func(item)
 ```
-such that `fmap` can effectively be used as an async map.
+which allows mapping a synchronous function over an asynchronous iterable. To map an asynchronous function over a synchronous iterable, see [`async_map`](#async_map).
 
 Some objects from external libraries are also given special support:
 * For [`numpy`](#numpy-integration) objects, `fmap` will use [`np.vectorize`](https://docs.scipy.org/doc/numpy/reference/generated/numpy.vectorize.html) to produce the result.
@@ -3527,7 +3532,7 @@ def safe_call(f, /, *args, **kwargs):
         return Expected(error=err)
 ```
 
-To define a function that always returns an `Expected` rather than raising any errors, simply decorate it with `@safe_call$`.
+To define a function that always returns an `Expected` rather than raising any `Exception`s, simply decorate it with `@safe_call$`.
 
 ##### Example
 

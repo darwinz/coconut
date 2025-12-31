@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(cat:*)",
+      "Bash(cd:*)",
+      "Bash(ls:*)",
+      "Bash(echo:*)",
+      "Bash(python:*)",
+      "Bash(gh:*)",
+      "Bash(pip:*)",
+      "Bash(conda:*)",
+      "Bash(xonsh:*)",
+      "Bash(make test-tests:*)",
+      "WebFetch(domain:coconut.readthedocs.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:peps.python.org)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:discuss.python.org)",
+      "WebFetch(domain:doc.pypy.org)"
+    ]
+  }
+}

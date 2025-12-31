@@ -58,7 +58,7 @@ coconut -h
 ```
 which should display Coconut's command-line help.
 
-_Note: If you're having trouble, or if anything mentioned in this tutorial doesn't seem to work for you, feel free to [ask for help on Gitter](https://gitter.im/evhub/coconut) and somebody will try to answer your question as soon as possible._
+_Note: If you're having trouble, or if anything mentioned in this tutorial doesn't seem to work for you, feel free to [raise an issue on GitHub](https://github.com/evhub/coconut/issues/new)!_
 
 ## Starting Out
 
@@ -1163,6 +1163,6 @@ def int_map(
 
 And that's it for this tutorial! But that's hardly it for Coconut. All of the features examined in this tutorial, as well as a bunch of others, are detailed in Coconut's [documentation](./DOCS.md).
 
-Also, if you have any other questions not covered in this tutorial, feel free to ask around at Coconut's [Gitter](https://gitter.im/evhub/coconut), a GitHub-integrated chat room for Coconut developers.
+Also, if you have any other questions not covered in this tutorial, feel free to [raise an issue on GitHub](https://github.com/evhub/coconut/issues/new)!
 
 Finally, Coconut is a new, growing language, and if you'd like to get involved in the development of Coconut, all the code is available completely open-source on Coconut's [GitHub](https://github.com/evhub/coconut). Contributing is a simple as forking the code, making your changes, and proposing a pull request! See Coconuts [contributing guidelines](./CONTRIBUTING.md) for more information.

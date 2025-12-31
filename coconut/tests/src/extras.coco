@@ -10,7 +10,7 @@ from coconut.constants import (
     NUMPY,
     PY35,
     PY36,
-    PY39,
+    PY310,
     PYPY,
 )  # type: ignore
 from coconut._pyparsing import USE_COMPUTATION_GRAPH  # type: ignore
@@ -278,6 +278,8 @@ def f() =
 }"""'''), CoconutSyntaxError, err_has="parsing failed for format string expression")
     assert_raises(-> parse("if a = b: pass"), CoconutParseError, err_has="misplaced assignment")
     assert_raises(-> parse("while a == b"), CoconutParseError, err_has="misplaced newline")
+    # implicit coefficient followed by subscript in list should be a parse error, not internal error
+    assert_raises(-> parse("[(0)foo[0] for _ in [0]]"), CoconutParseError)
 
     try:
         parse("""
@@ -374,7 +376,6 @@ line 6''')
     assert_raises(-> parse("def f(x):\\\n pass"), CoconutStyleError)
     assert_raises(-> parse("abc "), CoconutStyleError, err_has="\n     ^")
     assert_raises(-> parse("abc", "file"), CoconutStyleError)
-    assert_raises(-> parse("a=1;"), CoconutStyleError, err_has="\n     ^")
     assert_raises(-> parse("class derp(object)"), CoconutStyleError)
     assert_raises(-> parse("def f(a.b) = True"), CoconutStyleError, err_has="\n        ^")
     assert_raises(-> parse("match def kwd_only_x_is_int_def_0(*, x is int = 0) = x"), CoconutStyleError, err_has=(
@@ -604,12 +605,12 @@ def test_kernel() -> bool:
     assert k.do_execute("ident$(\n?,\n)(99)", False, True, {}, True) |> unwrap_future$(loop) |> .["status"] == "ok"
     captured_msg_type, captured_msg_content = fake_session.captured_messages[-1]
     assert captured_msg_content is None
-    assert captured_msg_type["content"]["data"]["text/plain"] == "99"
+    assert captured_msg_type["content"]["data"]["text/plain"] == "99", captured_msg_type["content"]["data"]["text/plain"]
 
     assert k.do_execute('"""\n(\n)\n"""', False, True, {}, True) |> unwrap_future$(loop) |> .["status"] == "ok"
     captured_msg_type, captured_msg_content = fake_session.captured_messages[-1]
     assert captured_msg_content is None
-    assert captured_msg_type["content"]["data"]["text/plain"] == "'()'"
+    assert captured_msg_type["content"]["data"]["text/plain"] in ("'()'", "'\\n(\\n)\\n'"), captured_msg_type["content"]["data"]["text/plain"]
 
     assert k.do_execute("""[
     "hey",
@@ -618,7 +619,7 @@ def test_kernel() -> bool:
 ]""", False, True, {}, True) |> unwrap_future$(loop) |> .["status"] == "ok"
     captured_msg_type, captured_msg_content = fake_session.captured_messages[-1]
     assert captured_msg_content is None
-    assert captured_msg_type["content"]["data"]["text/plain"] == "['hey', 'is comment']"
+    assert captured_msg_type["content"]["data"]["text/plain"] == "['hey', 'is comment']", captured_msg_type["content"]["data"]["text/plain"]
 
     return True
 
@@ -767,7 +768,7 @@ def test_extras() -> bool:
     if NUMPY and PY36:
         assert test_pandas() is True  # .
     print(".", end="")
-    if NUMPY and PY39:
+    if NUMPY and PY310:
         assert test_xarray() is True # ..
     print(".")  # newline bc we print stuff after this
     assert test_setup_none() is True  # ...

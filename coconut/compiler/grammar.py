@@ -807,7 +807,7 @@ class Grammar(object):
         dubbackslash = Literal("\\\\")
         backslash = disambiguate_literal("\\", ["\\\\"])
         dubquestion = Literal("??")
-        questionmark = disambiguate_literal("?", ["??"])
+        questionmark = disambiguate_literal("?", ["??", "?\u21a6", "?*"])
         bang = disambiguate_literal("!", ["!="])
 
         kwds = keydefaultdict(partial(base_keyword, explicit_prefix=colon))
@@ -929,11 +929,13 @@ class Grammar(object):
 
         u_string = Forward()
         f_string = Forward()
+        t_string = Forward()
 
         bit_b = caseless_literal("b")
         raw_r = caseless_literal("r")
         unicode_u = caseless_literal("u", suppress=True)
         format_f = caseless_literal("f", suppress=True)
+        template_t = caseless_literal("t", suppress=True)
 
         string = combine(Optional(raw_r) + string_item)
         # Python 2 only supports br"..." not rb"..."
@@ -941,8 +943,9 @@ class Grammar(object):
         # ur"..."/ru"..." strings are not suppored in Python 3
         u_string_ref = combine(unicode_u + string_item)
         f_string_tokens = combine((format_f + Optional(raw_r) | raw_r + format_f) + string_item)
+        t_string_tokens = combine((template_t + Optional(raw_r) | raw_r + template_t) + string_item)
         nonbf_string = string | u_string
-        nonb_string = nonbf_string | f_string
+        nonb_string = nonbf_string | f_string | t_string
         any_string = nonb_string | b_string
         moduledoc = any_string + newline
         docstring = condense(moduledoc)
@@ -1311,13 +1314,18 @@ class Grammar(object):
 
         list_expr = Forward()
         list_expr_ref = testlist_star_namedexpr_tokens
+        array_literal_item = (
+            attach(comprehension_expr, add_bracks_handle)
+            | namedexpr_test + ~comma
+            | list_expr
+        )
+        # require at least one multisemicolon for array_literal to match
+        array_literal_contents = (
+            ZeroOrMore(array_literal_item)
+            + OneOrMore(multisemicolon + ZeroOrMore(array_literal_item))
+        )
         array_literal = attach(
-            lbrack.suppress() + OneOrMore(
-                multisemicolon
-                | attach(comprehension_expr, add_bracks_handle)
-                | namedexpr_test + ~comma
-                | list_expr
-            ) + rbrack.suppress(),
+            lbrack.suppress() + array_literal_contents + rbrack.suppress(),
             array_literal_handle,
         )
         list_item = (
@@ -2616,7 +2624,6 @@ class Grammar(object):
             decoratable_data_stmt,
             match_stmt,
             passthrough_stmt,
-            where_stmt,
         )
 
         flow_stmt = any_of(
@@ -2661,8 +2668,8 @@ class Grammar(object):
         stmt <<= final(
             compound_stmt
             | simple_stmt  # includes destructuring
-            # must be after destructuring due to ambiguity
-            | cases_stmt
+            | cases_stmt  # must be after destructuring due to ambiguity
+            | where_stmt  # slows down parsing when put before simple_stmt
             # at the very end as a fallback case for the anything parser
             | anything_stmt
         )
@@ -2781,8 +2788,6 @@ class Grammar(object):
                 rparen,
             ) + end_marker,
             tco_return_handle,
-            # this is the root in what it's used for, so might as well evaluate greedily
-            greedy=True,
         ))
 
         rest_of_lambda = Forward()
@@ -2860,7 +2865,7 @@ class Grammar(object):
             | fixto(end_of_line, "misplaced newline (maybe missing ':')")
         )
 
-        start_f_str_regex = compile_regex(r"\br?fr?$")
+        start_f_str_regex = compile_regex(r"\br?[ft]r?$")
         start_f_str_regex_len = 4
 
         end_f_str_expr = StartOfStrGrammar(combine(rbrace | colon | bang).leaveWhitespace())
